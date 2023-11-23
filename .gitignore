@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 *.webm
 Discord_Music_Bot/bot_keys
+bot_keys

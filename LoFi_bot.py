@@ -249,7 +249,7 @@ async def clean_files():
 
 
 class SuppressYouTubeMessages:
-    """ redirects [youtube] blablabla messages to dev/null"""
+    """ filters out [youtube] blablabla messages """
     def write(self, message):
         if '[youtube]' not in message:
             sys.__stdout__.write(message)

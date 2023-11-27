@@ -10,6 +10,7 @@ ffmpeg
 To do:
 - implement buttons
 - implement next song
+- instantiate the runs of the bot
 
 Done:
 - implemented search function

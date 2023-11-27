@@ -79,7 +79,7 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
         song_queues[guild_id].pop(0)
         song_queue_name.popleft()
         await find_files_to_clean()
-        if len(files_to_clean) >= 10:
+        if len(files_to_clean) >= 50:
             await clean_files()
 
         next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': False})

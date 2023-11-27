@@ -16,6 +16,7 @@ Done:
 - implemented queue's
 - implemented text interface to be displayed in discord of what is currently playing
 - clean up of downloaded locally files
+- improved console logging
 """
 
 import discord
@@ -24,6 +25,7 @@ import yt_dlp
 from collections import deque
 import os
 import glob
+import sys
 
 # store the bot token in a bot_keys file as plain text
 with open('bot_keys', 'r') as f:
@@ -41,7 +43,9 @@ yt_dl_opts = {"format": 'bestaudio/best',
               "logtostderr": False,
               "quiet": True,
               "no_warnings": True,
-              "default_search": "auto"
+              "default_search": "auto",
+              "external_downloader_args": ["-loglevel", "panic"],
+              "verbose": False
               }
 ffmpeg_options = {
     'options': '-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 15'
@@ -53,8 +57,6 @@ url = ''
 bot_chat = None
 client = discord.Client(command_prefix='$', intents=discord.Intents.all())
 files_to_clean = []
-os.path.dirname(os.path.abspath(__file__))
-WORKING_DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 # queue handler
@@ -247,4 +249,15 @@ def clean_files():
         print(f"Cleared {file} from local repo")
 
 
+class SuppressYouTubeMessages:
+    """ redirects [youtube] blablabla messages to dev/null"""
+    def write(self, message):
+        if '[youtube]' not in message:
+            sys.__stdout__.write(message)
+
+    def flush(self):
+        pass
+
+
+sys.stdout = SuppressYouTubeMessages()
 client.run(key)

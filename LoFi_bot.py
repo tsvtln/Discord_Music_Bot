@@ -40,15 +40,13 @@ yt_dl_opts = {"format": 'bestaudio/best',
               "retry_max": "auto",
               "noplaylist": True,
               "nocheckcertificate": True,
-              "logtostderr": False,
               "quiet": True,
               "no_warnings": True,
-              "default_search": "auto",
-              "external_downloader_args": ["-loglevel", "panic"],
-              "verbose": False
+              "verbose": False,
+              'allow_multiple_audio_streams': True
               }
 ffmpeg_options = {
-    'options': '-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 15'
+    'options': '-vn -reconnect 15 -reconnect_streamed 15 -reconnect_delay_max 15'
 }
 song_queue_name = deque()
 ytdl = yt_dlp.YoutubeDL(yt_dl_opts)
@@ -80,12 +78,13 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
         # clean up
         song_queues[guild_id].pop(0)
         song_queue_name.popleft()
-        find_files_to_clean()
+        await find_files_to_clean()
         if len(files_to_clean) >= 10:
-            clean_files()
+            await clean_files()
 
-        next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': True})
+        next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': False})
         next_audio = discord.FFmpegPCMAudio(next_song['url'], **ffmpeg_options, executable="/usr/bin/ffmpeg")
+        await asyncio.sleep(15)
         voice_clients[guild_id].play(next_audio,
                                      after=lambda e: asyncio.run_coroutine_threadsafe(play_next_song(guild_id, msg),
                                                                                       client.loop))
@@ -234,7 +233,7 @@ class NotInVoiceChannel(Exception):
         super().__init__(self.message)
 
 
-def find_files_to_clean():
+async def find_files_to_clean():
     """ collects a list of files to be cleaned"""
     global files_to_clean
     files_to_clean.clear()
@@ -242,7 +241,7 @@ def find_files_to_clean():
     files_to_clean = glob.glob(pattern)
 
 
-def clean_files():
+async def clean_files():
     global files_to_clean
     for file in files_to_clean:
         os.remove(file)

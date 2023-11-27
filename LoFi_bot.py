@@ -6,6 +6,7 @@ discord.py
 asyncio
 yt_dlp
 ffmpeg
+PyNaCl
 
 To do:
 - implement buttons
@@ -60,7 +61,7 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
             await msg.channel.send(f"Пущам: {get_video_name(next_url)}")
         song_queues[guild_id].pop(0)
         song_queue_name.popleft()
-        next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': True})
+        next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': False})
         next_audio = discord.FFmpegPCMAudio(next_song['url'], **ffmpeg_options, executable="/usr/bin/ffmpeg")
         voice_clients[guild_id].play(next_audio,
                                      after=lambda e: asyncio.run_coroutine_threadsafe(play_next_song(guild_id, msg),

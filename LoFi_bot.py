@@ -195,7 +195,7 @@ def get_video_name(youtube_url):  # gets the name of a video/song
         return "Error retrieving video title"
 
 
-def find_video_url(search_query):  # gets the pure url to a video, based only a search query
+def find_video_url(search_query):  # gets the pure url to a video, based only on a search query
     ydl_opts = yt_dl_opts
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         video = ydl.extract_info(f"ytsearch:{search_query}", ie_key='YoutubeSearch')['entries'][0]

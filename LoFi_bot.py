@@ -6,7 +6,6 @@ discord.py
 asyncio
 yt_dlp
 ffmpeg
-PyNaCl
 
 To do:
 - implement buttons
@@ -16,12 +15,15 @@ Done:
 - implemented search function
 - implemented queue's
 - implemented text interface to be displayed in discord of what is currently playing
+- clean up of downloaded locally files
 """
 
 import discord
 import asyncio
 import yt_dlp
 from collections import deque
+import os
+import glob
 
 # store the bot token in a bot_keys file as plain text
 with open('bot_keys', 'r') as f:
@@ -31,14 +33,28 @@ key = bot_token
 # vars
 voice_clients = {}
 song_queues = {}
-yt_dl_opts = {"format": 'bestaudio/best'}
+yt_dl_opts = {"format": 'bestaudio/best',
+              "restrictfilenames": True,
+              "retry_max": "auto",
+              "noplaylist": True,
+              "nocheckcertificate": True,
+              "logtostderr": False,
+              "quiet": True,
+              "no_warnings": True,
+              "default_search": "auto"
+              }
+ffmpeg_options = {
+    'options': '-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 15'
+}
 song_queue_name = deque()
 ytdl = yt_dlp.YoutubeDL(yt_dl_opts)
 voice_status = 'not connected'
 url = ''
 bot_chat = None
 client = discord.Client(command_prefix='$', intents=discord.Intents.all())
-ffmpeg_options = {'options': '-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 15'}
+files_to_clean = []
+os.path.dirname(os.path.abspath(__file__))
+WORKING_DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 # queue handler
@@ -59,9 +75,14 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
             await msg.channel.send(bot_chat)
         else:
             await msg.channel.send(f"Пущам: {get_video_name(next_url)}")
+        # clean up
         song_queues[guild_id].pop(0)
         song_queue_name.popleft()
-        next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': False})
+        find_files_to_clean()
+        if len(files_to_clean) >= 10:
+            clean_files()
+
+        next_song = await asyncio.to_thread(ytdl.extract_info, next_url, {'download': True})
         next_audio = discord.FFmpegPCMAudio(next_song['url'], **ffmpeg_options, executable="/usr/bin/ffmpeg")
         voice_clients[guild_id].play(next_audio,
                                      after=lambda e: asyncio.run_coroutine_threadsafe(play_next_song(guild_id, msg),
@@ -196,7 +217,7 @@ def get_video_name(youtube_url):  # gets the name of a video/song
         return "Error retrieving video title"
 
 
-def find_video_url(search_query):  # gets the pure url to a video, based only on a search query
+def find_video_url(search_query):  # gets the pure url to a video, based only a search query
     ydl_opts = yt_dl_opts
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         video = ydl.extract_info(f"ytsearch:{search_query}", ie_key='YoutubeSearch')['entries'][0]
@@ -209,6 +230,21 @@ class NotInVoiceChannel(Exception):
     def __init__(self, message="User not in voice channel."):
         self.message = message
         super().__init__(self.message)
+
+
+def find_files_to_clean():
+    """ collects a list of files to be cleaned"""
+    global files_to_clean
+    files_to_clean.clear()
+    pattern = os.path.join('.', '*.webm')
+    files_to_clean = glob.glob(pattern)
+
+
+def clean_files():
+    global files_to_clean
+    for file in files_to_clean:
+        os.remove(file)
+        print(f"Cleared {file} from local repo")
 
 
 client.run(key)

@@ -37,6 +37,11 @@ key = bot_token
 voice_clients = {}
 song_queues = {}
 yt_dl_opts = {"format": 'bestaudio/best',
+              "postprocessors": [{
+                  "key": "FFmpegExtractAudio",
+                  "preferredcodec": "mp3",
+                  "preferredquality": "192"
+              }],
               "restrictfilenames": True,
               "retry_max": "auto",
               "noplaylist": True,

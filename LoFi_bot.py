@@ -39,7 +39,6 @@ song_queues = {}
 yt_dl_opts = {"format": 'bestaudio/best',
               "postprocessors": [{
                   "key": "FFmpegExtractAudio",
-                  "preferredcodec": "mp3",
                   "preferredquality": "192"
               }],
               "restrictfilenames": True,
@@ -68,11 +67,12 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
     global bot_chat
     if guild_id in song_queues and song_queues[guild_id]:
         next_url = song_queues[guild_id][0]
-        if 'MEGALOVANIA' in get_video_name(next_url):
+        video_name = get_video_name(next_url)
+        if 'MEGALOVANIA' in video_name:
             bot_chat = 'https://tenor.com/view/funny-dance-undertale-sans-gif-26048955'
-        elif "I'VE GOT NO FRIENDS" in get_video_name(next_url):
+        elif "I'VE GOT NO FRIENDS" in video_name:
             bot_chat = 'https://tenor.com/view/actorindie-worlds-smallest-violin-aww-violin-gif-13297153'
-        elif 'hipodil' in get_video_name(next_url).lower():
+        elif 'hipodil' in video_name.lower():
             bot_chat = 'https://tenor.com/view/cat-music-listening-gif-18335467'
         else:
             bot_chat = ''
@@ -80,7 +80,7 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
         if bot_chat:
             await msg.channel.send(bot_chat)
         else:
-            await msg.channel.send(f"Пущам: {get_video_name(next_url)}")
+            await msg.channel.send(f"Пущам: {video_name}")
         # clean up
         song_queues[guild_id].pop(0)
         song_queue_name.popleft()
@@ -94,7 +94,7 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
         voice_clients[guild_id].play(next_audio,
                                      after=lambda e: asyncio.run_coroutine_threadsafe(play_next_song(guild_id, msg),
                                                                                       client.loop))
-        await client.change_presence(activity=discord.Game(name=get_video_name(next_url)))
+        await client.change_presence(activity=discord.Game(name=video_name))
 
 
 @client.event
@@ -147,11 +147,12 @@ async def on_message(msg):
             if msg.guild.id not in song_queues:
                 song_queues[msg.guild.id] = []
 
-            if get_video_name(url) != 'Video title not available' and \
-                    get_video_name(url) != 'Error retrieving video title':
-                await msg.channel.send(f"Добавена песен в плейлиста: {get_video_name(url)}")
+            video_name = get_video_name(url)
+            if video_name != 'Video title not available' and \
+                    video_name != 'Error retrieving video title':
+                await msg.channel.send(f"Добавена песен в плейлиста: {video_name}")
                 song_queues[msg.guild.id].append(url)
-                song_queue_name.append(get_video_name(url))
+                song_queue_name.append(video_name)
             else:
                 await msg.channel.send('Пробуем при намирането на таз песен.')
 
@@ -243,7 +244,7 @@ async def find_files_to_clean():
     """ collects a list of files to be cleaned"""
     global files_to_clean
     files_to_clean.clear()
-    pattern = os.path.join('.', '*.webm')
+    pattern = os.path.join('.', '*.opus')
     files_to_clean = glob.glob(pattern)
 
 

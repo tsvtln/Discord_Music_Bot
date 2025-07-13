@@ -6,18 +6,16 @@
 
 ## Dependencies
 
-    discord.py
-    asyncio
-    yt_dlp
-    ffmpeg
+    In `requirements.txt`, you will find the necessary dependencies for this project. You can install them using pip.
 
 ## Features
 
-    • Play Music: The bot can play music in a Discord voice channel using YouTube URLs or search queries.
+    • Play Music: The bot can play music in a Discord voice channel using YouTube URLs or search queries, streaming audio instantly without waiting for full download.
     • Queue Management: Users can add songs to the queue, and the bot will play them in order.
     • Text Interface: The bot displays the current playing song in the Discord chat.
     • Pause, Resume, Stop: Users can control playback with commands to pause, resume, or stop the current song.
     • Queue Display: Users can check the current queue of songs.
+    • Keyword GIF & String Responses: The bot automatically responds to messages containing specific keywords with random GIFs or custom text responses, using whole-word matching (e.g., 'бира' but not 'разбирам').
 
 ## To-Do
 

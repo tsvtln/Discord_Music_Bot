@@ -114,6 +114,8 @@ async def on_message(msg):
         'цици': booba,
         'бири': beer,
         'бира': beer,
+        'bira': beer,
+        'biri': beer,
         'beer': beer,
         'наздраве': cheer,
         'кур': kur,

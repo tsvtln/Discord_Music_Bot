@@ -142,12 +142,12 @@ async def on_message(msg):
     lowered = msg.content.lower()
     # First, check for string responses
     for word, response in keyword_strings.items():
-        if re.search(rf'\\b{re.escape(word)}\\b', lowered):
+        if re.search(rf'\b{re.escape(word)}\b', lowered):
             await msg.channel.send(response)
             return
     # Then, check for GIF responses
     for word, gif_list in keyword_gifs.items():
-        if re.search(rf'\\b{re.escape(word)}\\b', lowered):
+        if re.search(rf'\b{re.escape(word)}\b', lowered):
             await msg.channel.send(random.choice(gif_list))
             return
 

@@ -10,6 +10,7 @@ import random
 import re
 import subprocess
 from bot_map import *
+import datetime
 
 # store the bot token in a bot_keys file as plain text
 with open('bot_keys', 'r') as f:
@@ -107,44 +108,69 @@ async def on_message(msg):
     await handle_shell_command(msg)
 
     # --- Keyword GIF and string auto-response ---
+    beer_keywords = ['бири', 'бира', 'bira', 'biri', 'beer']
+    kur_keywords = ['кур', 'курец', 'курове', 'кура', 'kur', 'kure', 'kura']
+    usl_keywords = ['useless', 'uselessa', 'юслес', 'юслеса', 'ангел', 'ачо', 'a4o']
+    bot_keywords = ['бот', 'бота', 'ботче', 'bot', 'bota']
+    haralampi_keywords = ['haralampi', 'харалампи']
+    wednesday_keywords = ['сряда', 'срядата', 'wednesday', 'wensday', 'wendesday', 'srqda']
+
     keyword_gifs = {
         'car': ['https://media.giphy.com/media/3o6Zt6ML6BklcajjsA/giphy.gif'],
         'cat': ['https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif'],
         'dog': ['https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif'],
         'цици': booba,
-        'бири': beer,
-        'бира': beer,
-        'bira': beer,
-        'biri': beer,
-        'beer': beer,
         'наздраве': cheer,
-        'кур': kur,
-        'курец': kur,
-        'курове': kur,
-        'кура': kur,
-        'useless': usl,
-        'uselessa': usl,
-        'юслес': usl,
-        'юслеса': usl,
-        'ангел': usl,
-        'ачо': usl,
+        '1991': ['https://i.pinimg.com/736x/79/b7/84/79b784792d35c304af077ee2e450eea1.jpg'],  # Test KW
     }
 
-    keyword_strings = {
-        'бот': funny[0],
-        'бота': funny[0],
-        'ботче': funny[0],
-        'bot': funny[0],
-        'haralampi': funny[1],
-        'харалампи': funny[1],
+    keyword_strings = {}
+
+    # Use string keys for gif_groups
+    # K:V = Keyword:GIFList
+    gif_groups = {
+        'beer': beer_keywords,
+        'kur': kur_keywords,
+        'usl': usl_keywords,
+        'its_wednesday': wednesday_keywords,
     }
+
+    # Loop through gif_groups to map keywords to GIF lists
+    for gif_key, keywords in gif_groups.items():
+        gif_list = globals()[gif_key]
+        for word in keywords:
+            keyword_gifs[word] = gif_list
+
+    # Optimized group mapping for strings
+    # K:V = Reaction:KeywordsList
+    string_groups = {
+        funny[0]: bot_keywords,
+        funny[1]: haralampi_keywords,
+    }
+
+    # Loop through string_groups to map keywords to string responses
+    for string_value, keywords in string_groups.items():
+        for word in keywords:
+            keyword_strings[word] = string_value
 
     lowered = msg.content.lower()
+
     # First, check for string responses
     for word, response in keyword_strings.items():
         if re.search(rf'\b{re.escape(word)}\b', lowered):
             await msg.channel.send(response)
             return
+
+    # Only check for wednesday keywords and respond accordingly if matched
+    if any(re.search(rf'\b{re.escape(word)}\b', lowered) for word in wednesday_keywords):
+        today = datetime.datetime.now().strftime('%A')
+        if today.lower() == 'wednesday':
+            gif_list = its_wednesday
+        else:
+            gif_list = not_wednesday
+        await msg.channel.send(random.choice(gif_list))
+        return
+
     # Then, check for GIF responses
     for word, gif_list in keyword_gifs.items():
         if re.search(rf'\b{re.escape(word)}\b', lowered):

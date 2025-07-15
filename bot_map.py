@@ -144,6 +144,3 @@ not_allowed = {
     'rm -rf *': 'https://media.giphy.com/media/3XEgV9kfwLy1i/giphy.gif'
 }
 # ===== END OS Commands =====
-
-fruits = ["apple", "banana", "cherry", "date", "elderberry"]
-

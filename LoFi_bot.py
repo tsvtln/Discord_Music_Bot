@@ -289,7 +289,8 @@ async def on_message(msg):
             'tailscale_s1 - Check Tailscale status Media Server',
             'tailscale_s2 - Check Tailscale status Jelly Server',
             'jelly - Check Jellyfin status',
-            'zabbix - Check Zabbix status',
+            'zabbix_s1 - Check Zabbix status on media server',
+            'zabbix_s2 - Check Zabbix status on jelly server',
             'dns - Check DNS status',
         ]
 

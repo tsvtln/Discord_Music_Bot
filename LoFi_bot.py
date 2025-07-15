@@ -232,6 +232,7 @@ async def on_message(msg):
             voice_status = 'not connected'
             print(err)
 
+# ===== BEGIN Player Control Commands =====
     if msg.content.startswith("$pause"):
         try:
             voice_clients[msg.guild.id].pause()
@@ -254,15 +255,6 @@ async def on_message(msg):
         except Exception as err:
             print(err)
 
-    if msg.content.startswith("$key_words"):
-        keywords = [
-            'car', 'cat', 'dog', 'цици', 'бири', 'бира', 'beer',
-            'наздраве', 'кур', 'курец', 'курове', 'кура',
-            'useless', 'uselessa', 'юслес', 'юслеса',
-            'ангел', 'ачо'
-        ]
-        await msg.channel.send(f"Ключови думи:\n{', '.join(keywords)}")
-
     if msg.content.startswith("$queue"):
         if msg.guild.id in song_queues and song_queue_name:
             formatted_queue = [f"{i}. {name}" for i, name in enumerate(song_queue_name, 1)]
@@ -270,7 +262,41 @@ async def on_message(msg):
             await msg.channel.send(f"Плейлист:\n{queue_list}")
         else:
             await msg.channel.send('Нема плейлист')
+# ===== END Player Control Commands =====
 
+# ===== BEGIN Other Commands =====
+    if msg.content.startswith("$key_words"):
+        # Dynamically collect all keywords from defined lists and keyword_gifs
+        all_keywords = set(
+            beer_keywords +
+            kur_keywords +
+            usl_keywords +
+            bot_keywords +
+            haralampi_keywords +
+            wednesday_keywords +
+            list(keyword_gifs.keys())
+        )
+        await msg.channel.send(f"Ключови думи:\n{', '.join(sorted(all_keywords))}")
+
+    if msg.content.startswith("$cmds"):
+        # List of allowed OS commands
+        allowed_commands_list = [
+            'date',
+            'uptime',
+            'cpu - Top 5 CPU consuming processes',
+            'mem - Top 5 Memory consuming processes',
+            'disk - Disk usage',
+            'tailscale_s1 - Check Tailscale status Media Server',
+            'tailscale_s2 - Check Tailscale status Jelly Server',
+            'jelly - Check Jellyfin status',
+            'zabbix_s1 - Check Zabbix status on media server',
+            'zabbix_s2 - Check Zabbix status on jelly server',
+            'dns - Check DNS status',
+        ]
+
+# ===== END Other Commands =====
+
+    # Output the list of commands
     if msg.content.startswith("$commands"):
         list_of_commands = [
             '$play (url или име на песен) - Пуща песен',
@@ -278,7 +304,7 @@ async def on_message(msg):
             '$stop - Спира песента и трие све',
             '$resume - Пуща паузираната песен',
             '$queue - Показва плейлиста',
-            '$key_words - Показва ключови думи',
+            # '$key_words - Показва ключови думи',
         ]
         tp = '\n'.join(list_of_commands)
         await msg.channel.send(f"Куманди:\n{tp}")
@@ -286,7 +312,8 @@ async def on_message(msg):
 
 async def handle_shell_command(msg):
     # Handles shell commands sent by users
-    if msg.content.startswith('$') and not msg.content.startswith(('$play', '$pause', '$resume', '$stop', '$queue', '$commands')):
+    if msg.content.startswith('$') and not msg.content.startswith(
+            ('$play', '$cmds', '$pause', '$resume', '$stop', '$queue', '$commands', '$key_words')):
         cmd_key = msg.content[1:].strip()
         if cmd_key in allowed_commands:
             command = allowed_commands[cmd_key]
@@ -355,6 +382,7 @@ async def clean_files():
 
 class SuppressYouTubeMessages:
     """ redirects [youtube] blablabla messages to dev/null"""
+
     def write(self, message):
         if '[youtube]' not in message or 'File' not in message:
             sys.__stdout__.write(message)

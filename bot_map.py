@@ -1,6 +1,7 @@
 # This file contains lists and mappings for GIFs and string responses used by the Discord bot.
 # We import this file in the main bot code to keep LoFi_bot.py clean.
 
+# ===== BEGIN GIFs =====
 beer = [
     'https://media.giphy.com/media/wKSnAdyvKHKHS/giphy.gif',
     'https://media.giphy.com/media/lTGLOH7ml3poQ6JoFg/giphy.gif',
@@ -54,6 +55,20 @@ usl = [
     'https://media.giphy.com/media/Gtnf8Fok8An9m/giphy.gif',
 ]
 
+its_wednesday = [
+    'https://64.media.tumblr.com/47d8fcdc9ff224e4621a07acd605848a/tumblr_ou5pz8N1kh1wubnyeo1_r1_250.gif'
+]
+
+not_wednesday = [
+    'https://preview.redd.it/'
+    'wukhr6ylhjo41.png?width=640&crop=smart&auto=webp&s=6d249d495cfd5cdcecd2ab0b08fae0e80b3ff35c',
+    'https://i.pinimg.com/736x/79/b7/84/79b784792d35c304af077ee2e450eea1.jpg',
+    'https://media.tenor.com/80plcYSqPQsAAAAC/no-its-not-nope.gif',
+]
+
+# ===== END GIFs =====
+
+# ===== BEGIN Status Messages =====
 presence_states = [
     'цигу-мигу, чака-рака',
     'Биряна ми изпи Бирата',
@@ -84,12 +99,16 @@ presence_states = [
     'Малък сечко, голямо сечко',
     'Сецам бавно, тичам бързо',
 ]
+# ===== END Status Messages =====
 
+# ===== BEGIN Responses =====
 funny = [
     'Не съм! Истински чувек сам!',
     'Къде? Кой? Кога?',
 ]
+# ===== END Responses =====
 
+# ===== BEGIN OS Commands =====
 allowed_commands = {
     'date': 'date',
     'uptime': 'uptime',
@@ -101,3 +120,4 @@ allowed_commands = {
 not_allowed = {
     'rm -rf *': 'https://media.giphy.com/media/3XEgV9kfwLy1i/giphy.gif'
 }
+# ===== END OS Commands =====

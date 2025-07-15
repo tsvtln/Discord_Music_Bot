@@ -283,9 +283,18 @@ async def on_message(msg):
         allowed_commands_list = [
             'date',
             'uptime',
-            'cpu - Top 5 CPU consuming processes',
-            'mem - Top 5 Memory consuming processes',
-            'disk - Disk usage',
+            'cpu_ms - Top 5 CPU consuming processes media server',
+            'cpu_usg_ms - CPU usage media server',
+            'cpu_js - Top 5 CPU consuming processes jelly server',
+            'cpu_usg_js - CPU usage jelly server',
+            'mem_ms - Top 5 Memory consuming processes media server',
+            'mem_usg_ms - Memory usage media server',
+            'mem_usg_js - Memory usage jelly server',
+            'mem_js - Top 5 Memory consuming processes jelly server',
+            'disk_ms - Disk usage media server',
+            'disk_usage_ms - Disk usage media server',
+            'disk_js - Disk usage jelly server',
+            'disk_usage_js - Disk usage jelly server',
             'tailscale_s1 - Check Tailscale status Media Server',
             'tailscale_s2 - Check Tailscale status Jelly Server',
             'jelly - Check Jellyfin status',
@@ -293,6 +302,7 @@ async def on_message(msg):
             'zabbix_s2 - Check Zabbix status on jelly server',
             'dns - Check DNS status',
         ]
+        await msg.channel.send(f"List of available commands:\n{'\n'.join(allowed_commands_list)}")
 
 # ===== END Other Commands =====
 

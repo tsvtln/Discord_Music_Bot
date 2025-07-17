@@ -14,6 +14,7 @@ import datetime
 import requests
 from io import BytesIO
 from PIL import Image, ImageSequence, ImageFilter
+from weather_app import get_weather
 
 # store the bot token in a bot_keys file as plain text
 with open('bot_keys', 'r') as f:
@@ -356,6 +357,19 @@ async def on_message(msg):
         ]
         await msg.channel.send(f"List of available commands:\n{'\n'.join(allowed_commands_list)}")
 
+    # Weather command
+    if msg.content.startswith('$weather'):
+        parts = msg.content.split(maxsplit=1)
+        if len(parts) < 2 or not parts[1].strip():
+            # await msg.channel.send('Usage: $weather <city>')
+            return
+        city = parts[1].strip()
+        # await msg.channel.send('Getting weather...')
+        loop = asyncio.get_event_loop()
+        weather_info = await loop.run_in_executor(None, get_weather, city)
+        await msg.channel.send(weather_info)
+        return
+
 # ===== END Other Commands =====
 
     # Output the list of commands
@@ -366,6 +380,7 @@ async def on_message(msg):
             '$stop - Спира песента и трие све',
             '$resume - Пуща паузираната песен',
             '$queue - Показва плейлиста',
+            '$weather <град> - Показва времето в града. Пример: $weather Sofia',
             # '$key_words - Показва ключови думи',
         ]
         tp = '\n'.join(list_of_commands)
@@ -375,7 +390,7 @@ async def on_message(msg):
 async def handle_shell_command(msg):
     # Handles shell commands sent by users
     if msg.content.startswith('$') and not msg.content.startswith(
-            ('$play', '$cmds', '$pause', '$resume', '$stop', '$queue', '$commands', '$key_words')):
+            ('$play', '$cmds', '$pause', '$resume', '$stop', '$queue', '$commands', '$key_words', '$weather')):
         cmd_key = msg.content[1:].strip()
         if cmd_key in allowed_commands:
             command = allowed_commands[cmd_key]

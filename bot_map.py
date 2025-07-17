@@ -68,6 +68,8 @@ not_wednesday = [
     'https://media.tenor.com/80plcYSqPQsAAAAC/no-its-not-nope.gif',
 ]
 
+d1 = ['https://media1.tenor.com/m/zohPU51tyjoAAAAC/puppet-talk.gif']
+
 # ===== END GIFs =====
 
 # ===== BEGIN Status Messages =====

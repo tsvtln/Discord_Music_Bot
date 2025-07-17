@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [1.1.5]
+### Added
+- GIF resizing and caching: All GIFs triggered by keywords are now resized to a smaller size (120x120) before being sent to Discord, reducing chat spam and improving usability.
+- GIF cache: Resized GIFs are stored in a `gif_cache` folder and reused for future requests, improving performance and reducing bandwidth.
+- Improved GIF color handling: Resizing uses Pillow's adaptive palette and dithering for best color preservation within GIF limitations.
+- New keyword group: Added `d1` and `d1_keywords` for new GIF triggers.
+
+### Changed
+- Updated keyword mapping logic to include the new `d1` group and keywords.
+- Updated GIF resizing logic to use Pillow's modern enums for resampling, palette, and dithering (for compatibility and fewer warnings).
+
+### Fixed
+- Fixed warnings related to deprecated or missing Pillow constants (LANCZOS, ADAPTIVE, FLOYDSTEINBERG) by using the correct enums.
+- Fixed a bug where cached GIFs could be corrupted or not resized properly.
+- Improved fallback logic: If GIF resizing fails, the bot now falls back to sending the original GIF URL.
+
 ## [1.1.4]
 ### Added
 - Dynamic keyword listing for $key_words command: all keywords are now automatically collected from all keyword lists and mappings, no manual update required.

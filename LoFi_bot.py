@@ -174,7 +174,29 @@ async def on_message(msg):
             gif_list = its_wednesday
         else:
             gif_list = not_wednesday
-        await msg.channel.send(random.choice(gif_list))
+        gif_url = random.choice(gif_list)
+        import hashlib
+        cache_dir = 'gif_cache'
+        os.makedirs(cache_dir, exist_ok=True)
+        url_hash = hashlib.md5(gif_url.encode('utf-8')).hexdigest()
+        cache_path = os.path.join(cache_dir, f'wednesday_{url_hash}.gif')
+        if os.path.exists(cache_path):
+            await msg.channel.send(file=discord.File(fp=cache_path, filename='wednesday.gif'))
+        else:
+            try:
+                response = requests.get(gif_url)
+                response.raise_for_status()
+                original_gif = Image.open(BytesIO(response.content))
+                frames = []
+                for frame in ImageSequence.Iterator(original_gif):
+                    frame = frame.convert('RGBA')
+                    frame = frame.resize((120, 120), resample=Image.Resampling.LANCZOS)
+                    frame = frame.convert('P', palette=Image.Palette.ADAPTIVE, dither=Image.Dither.FLOYDSTEINBERG)
+                    frames.append(frame)
+                frames[0].save(cache_path, format='GIF', save_all=True, append_images=frames[1:], loop=0, duration=original_gif.info.get('duration', 40), disposal=2, transparency=original_gif.info.get('transparency', 0))
+                await msg.channel.send(file=discord.File(fp=cache_path, filename='wednesday.gif'))
+            except Exception as e:
+                await msg.channel.send(gif_url)
         return
 
     # Then, check for GIF responses

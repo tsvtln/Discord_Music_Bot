@@ -11,6 +11,9 @@ import re
 import subprocess
 from bot_map import *
 import datetime
+import requests
+from io import BytesIO
+from PIL import Image, ImageSequence, ImageFilter
 
 # store the bot token in a bot_keys file as plain text
 with open('bot_keys', 'r') as f:
@@ -114,6 +117,7 @@ async def on_message(msg):
     bot_keywords = ['бот', 'бота', 'ботче', 'bot', 'bota']
     haralampi_keywords = ['haralampi', 'харалампи']
     wednesday_keywords = ['сряда', 'срядата', 'wednesday', 'wensday', 'wendesday', 'srqda']
+    d1_keywords = ['day1']
 
     keyword_gifs = {
         'car': ['https://media.giphy.com/media/3o6Zt6ML6BklcajjsA/giphy.gif'],
@@ -122,6 +126,7 @@ async def on_message(msg):
         'цици': booba,
         'наздраве': cheer,
         '1991': ['https://i.pinimg.com/736x/79/b7/84/79b784792d35c304af077ee2e450eea1.jpg'],  # Test KW
+        'd1': d1,
     }
 
     keyword_strings = {}
@@ -133,6 +138,7 @@ async def on_message(msg):
         'kur': kur_keywords,
         'usl': usl_keywords,
         'its_wednesday': wednesday_keywords,
+        'd1': d1_keywords,
     }
 
     # Loop through gif_groups to map keywords to GIF lists
@@ -174,7 +180,31 @@ async def on_message(msg):
     # Then, check for GIF responses
     for word, gif_list in keyword_gifs.items():
         if re.search(rf'\b{re.escape(word)}\b', lowered):
-            await msg.channel.send(random.choice(gif_list))
+            gif_url = random.choice(gif_list)
+            # Use a filename based on the keyword and a hash of the URL to avoid collisions
+            import hashlib
+            cache_dir = 'gif_cache'
+            os.makedirs(cache_dir, exist_ok=True)
+            url_hash = hashlib.md5(gif_url.encode('utf-8')).hexdigest()
+            cache_path = os.path.join(cache_dir, f'{word}_{url_hash}.gif')
+            if os.path.exists(cache_path):
+                await msg.channel.send(file=discord.File(fp=cache_path, filename=f'{word}.gif'))
+            else:
+                try:
+                    response = requests.get(gif_url)
+                    response.raise_for_status()
+                    original_gif = Image.open(BytesIO(response.content))
+                    frames = []
+                    for frame in ImageSequence.Iterator(original_gif):
+                        frame = frame.convert('RGBA')
+                        frame = frame.resize((120, 120), resample=Image.Resampling.LANCZOS)
+                        # Use adaptive palette for best color preservation
+                        frame = frame.convert('P', palette=Image.Palette.ADAPTIVE, dither=Image.Dither.FLOYDSTEINBERG)
+                        frames.append(frame)
+                    frames[0].save(cache_path, format='GIF', save_all=True, append_images=frames[1:], loop=0, duration=original_gif.info.get('duration', 40), disposal=2, transparency=original_gif.info.get('transparency', 0))
+                    await msg.channel.send(file=discord.File(fp=cache_path, filename=f'{word}.gif'))
+                except Exception as e:
+                    await msg.channel.send(gif_url)  # fallback: send original URL if resize fails
             return
 
     if msg.content.startswith('$play'):

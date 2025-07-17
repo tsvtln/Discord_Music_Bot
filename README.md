@@ -42,7 +42,8 @@
     3. Run the script, and the bot will be ready to join voice channels and play music.
 
 ## Notes
-    The bot currently will download the video in webm format 251, which helps if you have slower connection.
-    To disable this change {'download': True} to False
+- The bot streams audio directly from YouTube for fast playback and does not download the full video by default.
+- All GIFs triggered by keywords are resized and cached for less chat spam and faster response.
+- If you want to change the streaming or download behavior, adjust the `yt_dl_opts` dictionary in `LoFi_bot.py`.
 
 **Feel free to explore and modify the code based on your preferences and requirements. If you encounter any issues or have suggestions, please feel free to contribute or open an issue.**

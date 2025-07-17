@@ -162,3 +162,4 @@ cython_debug/
 Discord_Music_Bot/bot_keys
 bot_keys
 *.opus
+gif_cache/*

@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [1.1.6]
+### Added
+- $weather <city> command: The bot can now fetch and display the current weather for a specified city using the OpenWeatherMap API.
+- weather_app.py: Added main weather logic, including API integration and error handling.
+
+### Changed
+- Weather command output now includes user-friendly error messages for API issues (e.g., invalid key, quota exceeded, city not found).
+- Weather command and API key usage now rely on python-decouple for secure configuration.
+- Updated command list in $commands to include the new $weather command.
+
+### Fixed
+- Typo in GIF dithering constant (FLOYDSTEINBERГ → FLOYDSTEINBERG) for correct GIF processing.
+- Improved error handling and debug output for weather API failures.
+
 ## [1.1.5]
 ### Added
 - GIF resizing and caching: All GIFs triggered by keywords are now resized to a smaller size (120x120) before being sent to Discord, reducing chat spam and improving usability.

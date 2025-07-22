@@ -370,6 +370,29 @@ async def on_message(msg):
         await msg.channel.send(weather_info)
         return
 
+    # Lucky draw command
+    if msg.content.startswith('$kysmetche'):
+        username = str(msg.author)
+        draw_file = 'draw_data.txt'
+        already_drawn = False
+        # Check if user already drew today
+        if os.path.exists(draw_file):
+            with open(draw_file, 'r') as f:
+                for line in f:
+                    if username in line:
+                        already_drawn = True
+                        break
+        if already_drawn:
+            await msg.channel.send('Мое по 1 на ден. Сабалем мое пак.')
+            return
+        # Add user to draw_data.txt
+        with open(draw_file, 'a') as f:
+            f.write(username + '\n')
+        lucky_draw = random.choice(luck_list)
+        await msg.channel.send(lucky_draw)
+
+
+
 # ===== END Other Commands =====
 
     # Output the list of commands
@@ -381,6 +404,7 @@ async def on_message(msg):
             '$resume - Пуща паузираната песен',
             '$queue - Показва плейлиста',
             '$weather <град> - Показва времето в града. Пример: $weather Sofia',
+            '$kysmetche - Дръпни си късметчето за деня'
             # '$key_words - Показва ключови думи',
         ]
         tp = '\n'.join(list_of_commands)
@@ -389,8 +413,7 @@ async def on_message(msg):
 
 async def handle_shell_command(msg):
     # Handles shell commands sent by users
-    if msg.content.startswith('$') and not msg.content.startswith(
-            ('$play', '$cmds', '$pause', '$resume', '$stop', '$queue', '$commands', '$key_words', '$weather')):
+    if msg.content.startswith('$') and not msg.content.startswith(command_prefixes):
         cmd_key = msg.content[1:].strip()
         if cmd_key in allowed_commands:
             command = allowed_commands[cmd_key]

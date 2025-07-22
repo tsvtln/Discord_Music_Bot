@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [1.1.7]
+### Added
+- $kysmetche command: Users can now draw a daily fortune ("късметче").
+- draw_data.txt: Tracks which users have already drawn their fortune for the day to prevent multiple draws.
+- Command prefix list moved to bot_map.py for easier management and cleaner code in LoFi_bot.py.
+
+### Changed
+- Updated $commands output to include $kysmetche.
+- Refactored command prefix logic to use a shared tuple from bot_map.py.
+
+### Fixed
+- Prevented users from drawing more than once per day with $kysmetche.
+
 ## [1.1.6]
 ### Added
 - $weather <city> command: The bot can now fetch and display the current weather for a specified city using the OpenWeatherMap API.
@@ -71,4 +84,3 @@
 
 ## [1.0.0]
 - Initial version: basic music playback, queue, and text interface.
-

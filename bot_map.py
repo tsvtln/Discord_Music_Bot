@@ -80,7 +80,6 @@ not_wednesday = [
     'https://preview.redd.it/'
     'wukhr6ylhjo41.png?width=640&crop=smart&auto=webp&s=6d249d495cfd5cdcecd2ab0b08fae0e80b3ff35c',
     'https://i.pinimg.com/736x/79/b7/84/79b784792d35c304af077ee2e450eea1.jpg',
-    'https://media.tenor.com/80plcYSqPQsAAAAC/no-its-not-nope.gif',
 ]
 
 d1 = ['https://media1.tenor.com/m/zohPU51tyjoAAAAC/puppet-talk.gif']
@@ -124,6 +123,7 @@ presence_states = [
 funny = [
     'Не съм! Истински чувек сам!',
     'Къде? Кой? Кога?',
+    'Да бъдеш б0т или да не бъдеш б0т, това ли е въпроса?'
 ]
 # ===== END Responses =====
 

@@ -71,3 +71,4 @@
 
 ## [1.0.0]
 - Initial version: basic music playback, queue, and text interface.
+

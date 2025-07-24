@@ -24,16 +24,25 @@ key = bot_token
 # vars
 voice_clients = {}
 song_queues = {}
-yt_dl_opts = {"format": 'bestaudio/best',
-              "restrictfilenames": True,
-              "retry_max": "auto",
-              "noplaylist": True,
-              "nocheckcertificate": True,
-              "quiet": True,
-              "no_warnings": True,
-              "verbose": False,
-              'allow_multiple_audio_streams': True
-              }
+# yt_dl_opts = {"format": 'bestaudio/best',
+#               "restrictfilenames": True,
+#               "retry_max": "auto",
+#               "noplaylist": True,
+#               "nocheckcertificate": True,
+#               "quiet": True,
+#               "no_warnings": True,
+#               "verbose": False,
+#               'allow_multiple_audio_streams': True
+#               }
+yt_dl_opts = {
+    "format": "bestaudio[ext=m4a]/bestaudio/best",
+    "noplaylist": True,
+    "quiet": True,
+    "no_warnings": True,
+    "nocheckcertificate": True,
+    "restrictfilenames": True,
+    "retry_max": 3,
+}
 ffmpeg_options = {
     'options': '-vn -reconnect 15 -reconnect_streamed 15 -reconnect_delay_max 15'
 }

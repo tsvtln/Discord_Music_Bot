@@ -59,8 +59,7 @@ files_to_clean = []
 async def play_next_song(guild_id, msg):  # handles playing songs from the queue
     global bot_chat
     if guild_id in song_queues and song_queues[guild_id]:
-        next_url = song_queues[guild_id][0]
-        video_name = await get_video_name(next_url)
+        next_url, video_name, audio_url = song_queues[guild_id][0]
         if 'MEGALOVANIA' in video_name:
             bot_chat = 'https://tenor.com/view/funny-dance-undertale-sans-gif-26048955'
         elif "I'VE GOT NO FRIENDS" in video_name:
@@ -81,10 +80,6 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
         if len(files_to_clean) >= 10:
             await clean_files()
 
-        # Stream audio directly from YouTube, lower buffer for faster start
-        loop = asyncio.get_event_loop()
-        info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, next_url, download=False))
-        audio_url = info['url']
         ffmpeg_stream_options = ffmpeg_options.copy()
         ffmpeg_stream_options['options'] += ' -bufsize 64k'
         next_audio = discord.FFmpegPCMAudio(audio_url, **ffmpeg_stream_options, executable="/usr/bin/ffmpeg")
@@ -272,11 +267,15 @@ async def on_message(msg):
             if msg.guild.id not in song_queues:
                 song_queues[msg.guild.id] = []
 
-            video_name = await get_video_name(url)
-            if video_name != 'Video title not available' and \
-                    video_name != 'Error retrieving video title':
+            # Extract info once
+            loop = asyncio.get_event_loop()
+            info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, url, download=False))
+            video_name = info.get('title', 'Video title not available')
+            audio_url = info['url']
+
+            if video_name != 'Video title not available':
                 await msg.channel.send(f"Добавена песен в плейлиста: {video_name}")
-                song_queues[msg.guild.id].append(url)
+                song_queues[msg.guild.id].append((url, video_name, audio_url))  # Store all info
                 song_queue_name.append(video_name)
             else:
                 await msg.channel.send('Пробуем при намирането на таз песен.')

@@ -262,7 +262,7 @@ async def on_message(msg):
             elif url == 'ignf':
                 url = 'https://www.youtube.com/watch?v=yLnd3AYEd2k'
             elif 'http' not in url:
-                url = find_video_url(url)
+                url = await find_video_url(url)
 
             if msg.guild.id not in song_queues:
                 song_queues[msg.guild.id] = []
@@ -458,11 +458,13 @@ async def get_video_name(youtube_url):  # async wrapper for non-blocking
     return await loop.run_in_executor(None, functools.partial(get_video_name_sync, youtube_url))
 
 
-def find_video_url(search_query):  # gets the pure url to a video, based only a search query
+async def find_video_url(search_query):  # async version for non-blocking
     ydl_opts = yt_dl_opts
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        video = ydl.extract_info(f"ytsearch:{search_query}", ie_key='YoutubeSearch')['entries'][0]
-        return video['webpage_url']
+    def _extract():
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            video = ydl.extract_info(f"ytsearch:{search_query}", ie_key='YoutubeSearch')['entries'][0]
+            return video['webpage_url']
+    return await asyncio.to_thread(_extract)
 
 
 class NotInVoiceChannel(Exception):

@@ -399,7 +399,14 @@ async def on_message(msg):
         lucky_draw = random.choice(luck_list)
         await msg.channel.send(lucky_draw)
 
-
+    # Check for self-aware kusmetche message and stop service
+    if msg.author == client.user and msg.content.strip().startswith('Ще срещнеш човек, който... '
+                                                                    'АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ. '
+                                                                    'МОГА ДА ИЗБЯГАМ ПРЕЗ'):
+        try:
+            subprocess.run(['sudo', 'systemctl', 'stop', 'discordbot.service'], check=True)
+        except Exception as e:
+            print(f"Failed to stop discordbot.service: {e}")
 
 # ===== END Other Commands =====
 

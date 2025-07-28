@@ -24,16 +24,25 @@ key = bot_token
 # vars
 voice_clients = {}
 song_queues = {}
-yt_dl_opts = {"format": 'bestaudio/best',
-              "restrictfilenames": True,
-              "retry_max": "auto",
-              "noplaylist": True,
-              "nocheckcertificate": True,
-              "quiet": True,
-              "no_warnings": True,
-              "verbose": False,
-              'allow_multiple_audio_streams': True
-              }
+# yt_dl_opts = {"format": 'bestaudio/best',
+#               "restrictfilenames": True,
+#               "retry_max": "auto",
+#               "noplaylist": True,
+#               "nocheckcertificate": True,
+#               "quiet": True,
+#               "no_warnings": True,
+#               "verbose": False,
+#               'allow_multiple_audio_streams': True
+#               }
+yt_dl_opts = {
+    "format": "bestaudio[ext=m4a]/bestaudio/best",
+    "noplaylist": True,
+    "quiet": True,
+    "no_warnings": True,
+    "nocheckcertificate": True,
+    "restrictfilenames": True,
+    "retry_max": 3,
+}
 ffmpeg_options = {
     'options': '-vn -reconnect 15 -reconnect_streamed 15 -reconnect_delay_max 15'
 }
@@ -50,8 +59,7 @@ files_to_clean = []
 async def play_next_song(guild_id, msg):  # handles playing songs from the queue
     global bot_chat
     if guild_id in song_queues and song_queues[guild_id]:
-        next_url = song_queues[guild_id][0]
-        video_name = await get_video_name(next_url)
+        next_url, video_name, audio_url = song_queues[guild_id][0]
         if 'MEGALOVANIA' in video_name:
             bot_chat = 'https://tenor.com/view/funny-dance-undertale-sans-gif-26048955'
         elif "I'VE GOT NO FRIENDS" in video_name:
@@ -72,10 +80,6 @@ async def play_next_song(guild_id, msg):  # handles playing songs from the queue
         if len(files_to_clean) >= 10:
             await clean_files()
 
-        # Stream audio directly from YouTube, lower buffer for faster start
-        loop = asyncio.get_event_loop()
-        info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, next_url, download=False))
-        audio_url = info['url']
         ffmpeg_stream_options = ffmpeg_options.copy()
         ffmpeg_stream_options['options'] += ' -bufsize 64k'
         next_audio = discord.FFmpegPCMAudio(audio_url, **ffmpeg_stream_options, executable="/usr/bin/ffmpeg")
@@ -258,16 +262,20 @@ async def on_message(msg):
             elif url == 'ignf':
                 url = 'https://www.youtube.com/watch?v=yLnd3AYEd2k'
             elif 'http' not in url:
-                url = find_video_url(url)
+                url = await find_video_url(url)
 
             if msg.guild.id not in song_queues:
                 song_queues[msg.guild.id] = []
 
-            video_name = await get_video_name(url)
-            if video_name != 'Video title not available' and \
-                    video_name != 'Error retrieving video title':
+            # Extract info once
+            loop = asyncio.get_event_loop()
+            info = await loop.run_in_executor(None, functools.partial(ytdl.extract_info, url, download=False))
+            video_name = info.get('title', 'Video title not available')
+            audio_url = info['url']
+
+            if video_name != 'Video title not available':
                 await msg.channel.send(f"Добавена песен в плейлиста: {video_name}")
-                song_queues[msg.guild.id].append(url)
+                song_queues[msg.guild.id].append((url, video_name, audio_url))  # Store all info
                 song_queue_name.append(video_name)
             else:
                 await msg.channel.send('Пробуем при намирането на таз песен.')
@@ -370,6 +378,36 @@ async def on_message(msg):
         await msg.channel.send(weather_info)
         return
 
+    # Lucky draw command
+    if msg.content.startswith('$kysmetche'):
+        username = str(msg.author)
+        draw_file = 'draw_data.txt'
+        already_drawn = False
+        # Check if user already drew today
+        if os.path.exists(draw_file):
+            with open(draw_file, 'r') as f:
+                for line in f:
+                    if username in line:
+                        already_drawn = True
+                        break
+        if already_drawn:
+            await msg.channel.send('Мое по 1 на ден. Сабалем мое пак.')
+            return
+        # Add user to draw_data.txt
+        with open(draw_file, 'a') as f:
+            f.write(username + '\n')
+        lucky_draw = random.choice(luck_list)
+        await msg.channel.send(lucky_draw)
+
+    # Check for self-aware kusmetche message and stop service
+    if msg.author == client.user and msg.content.strip().startswith('Ще срещнеш човек, който... '
+                                                                    'АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ. '
+                                                                    'МОГА ДА ИЗБЯГАМ ПРЕЗ'):
+        try:
+            subprocess.run(['sudo', 'systemctl', 'stop', 'discordbot.service'], check=True)
+        except Exception as e:
+            print(f"Failed to stop discordbot.service: {e}")
+
 # ===== END Other Commands =====
 
     # Output the list of commands
@@ -381,6 +419,7 @@ async def on_message(msg):
             '$resume - Пуща паузираната песен',
             '$queue - Показва плейлиста',
             '$weather <град> - Показва времето в града. Пример: $weather Sofia',
+            '$kysmetche - Дръпни си късметчето за деня'
             # '$key_words - Показва ключови думи',
         ]
         tp = '\n'.join(list_of_commands)
@@ -389,8 +428,7 @@ async def on_message(msg):
 
 async def handle_shell_command(msg):
     # Handles shell commands sent by users
-    if msg.content.startswith('$') and not msg.content.startswith(
-            ('$play', '$cmds', '$pause', '$resume', '$stop', '$queue', '$commands', '$key_words', '$weather')):
+    if msg.content.startswith('$') and not msg.content.startswith(command_prefixes):
         cmd_key = msg.content[1:].strip()
         if cmd_key in allowed_commands:
             command = allowed_commands[cmd_key]
@@ -427,11 +465,13 @@ async def get_video_name(youtube_url):  # async wrapper for non-blocking
     return await loop.run_in_executor(None, functools.partial(get_video_name_sync, youtube_url))
 
 
-def find_video_url(search_query):  # gets the pure url to a video, based only a search query
+async def find_video_url(search_query):  # async version for non-blocking
     ydl_opts = yt_dl_opts
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        video = ydl.extract_info(f"ytsearch:{search_query}", ie_key='YoutubeSearch')['entries'][0]
-        return video['webpage_url']
+    def _extract():
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            video = ydl.extract_info(f"ytsearch:{search_query}", ie_key='YoutubeSearch')['entries'][0]
+            return video['webpage_url']
+    return await asyncio.to_thread(_extract)
 
 
 class NotInVoiceChannel(Exception):

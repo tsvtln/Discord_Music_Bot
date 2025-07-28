@@ -19,6 +19,8 @@
     • Dynamic keyword listing: The $key_words command now lists all keywords automatically from all keyword lists and mappings.
     • Wednesday keyword logic: If a message contains a Wednesday-related keyword, the bot checks the current day and sends a GIF from its_wednesday or not_wednesday accordingly.
     • All keyword and GIF/string mappings are grouped for easier maintenance and scalability.
+    • Weather Command: Use $weather <city> to get the current weather for a city (OpenWeatherMap API).
+    • Daily Fortune Draw: Use $kysmetche to draw a daily fortune (късметче). Each user can draw only once per day.
 
 ## To Do
 
@@ -34,6 +36,9 @@
     - Implemented a text interface to display the currently playing song in Discord.
     - Refactored keyword mapping logic for maintainability and scalability.
     - Added dynamic keyword listing and Wednesday logic.
+    - Added weather command with OpenWeatherMap API integration.
+    - Added daily fortune draw command ($kysmetche) with per-user tracking.
+    - Moved command prefix list to bot_map.py for easier management.
 
 ## Usage
 
@@ -45,5 +50,7 @@
 - The bot streams audio directly from YouTube for fast playback and does not download the full video by default.
 - All GIFs triggered by keywords are resized and cached for less chat spam and faster response.
 - If you want to change the streaming or download behavior, adjust the `yt_dl_opts` dictionary in `LoFi_bot.py`.
+- The $kysmetche command allows each user to draw a fortune only once per day; attempts to draw again will be denied.
+- Command prefixes are now managed in bot_map.py for easier updates.
 
 **Feel free to explore and modify the code based on your preferences and requirements. If you encounter any issues or have suggestions, please feel free to contribute or open an issue.**

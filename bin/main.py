@@ -16,11 +16,14 @@ from collections import deque
 from weather_app import get_weather
 from PIL import Image, ImageSequence, ImageFilter
 
-from lib.key_loaders import KeyLoader
-from lib.dap_holder import DAP
+from libs.key_loaders import KeyLoader
+from libs.dap_holder import DAP
+from libs.global_vars import VARS
 
-def BotRunner():
+
+class BotRunner(VARS):
     def __init__(self):
+        super().__init__()
         self.key = KeyLoader.bot_key()
         self.yt_dl_opts = DAP.dlp_options()
         self.ffmpeg_options = DAP.ffmpeg_options()
@@ -33,5 +36,3 @@ def BotRunner():
         self.bot_chat = None
         self.client = discord.Client(command_prefix='$', intents=discord.Intents.all())
         self.files_to_clean = []
-
-

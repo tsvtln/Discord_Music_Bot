@@ -5,10 +5,12 @@ class VARS:
     from .vars.command_prefixes import command_prefixes
     from .vars.gifs import beer, cheer, booba, kur, usl, its_wednesday, not_wednesday, d1
     from .vars.presence_states import presence_states
-    from .vars.responses import funny
     from .vars.os_commands import user, server, allowed_commands, not_allowed
     from .vars.lucky_list import luck_list
     from .vars.funny_responses import list_of_funny_not_allowed
+    from .vars.responses import bot_keywords as bot_responses
+    from .vars.responses import haralampi_keywords as haralampi_responses
+
     files_to_clean = []
     response_num = 0
 
@@ -20,6 +22,7 @@ class VARS:
     haralampi_keywords = ['haralampi', 'харалампи']
     wednesday_keywords = ['сряда', 'срядата', 'wednesday', 'wensday', 'wendesday', 'srqda']
     d1_keywords = ['day1']
+    booba_keywords = ['цици', 'цици', 'цицки', 'boobs', 'cici']
 
     # --- Allowed OS commands list ---
     allowed_commands_list = [
@@ -55,4 +58,3 @@ class VARS:
         '$weather <град> - Показва времето в града. Пример: $weather Sofia',
         '$kysmetche - Дръпни си късметчето за деня'
     ]
-

@@ -31,3 +31,5 @@ class ShellCommandHandler(VARS):
             else:
                 await msg.channel.send(self.list_of_funny_not_allowed[self.response_num])
                 self.response_num += 1
+                if self.response_num > (len(self.list_of_funny_not_allowed) - 1):
+                    self.response_num = 0

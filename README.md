@@ -1,8 +1,41 @@
-## Music Bot
+## Discord Bot v2.0.0
 
-> This Python script is a Discord music bot designed to play music in voice channels.
+> This Python Discord music bot features a modular architecture designed for scalability and maintainability.
 > It utilizes the discord.py library for Discord interactions, asyncio for asynchronous programming, and yt_dlp for handling YouTube video downloads.
 > The bot requires a reliable internet connection with a minimum upload speed of 25Mbps.
+
+## Architecture
+
+**Version 2.0.0** introduces a complete modular restructure:
+- **Modular Design**: Separated functionality into specialized modules for better maintainability
+- **Event-Driven**: Centralized event handling through the `EventHandlers` class
+- **Inheritance System**: Shared configuration through the `VARS` class inheritance model
+- **Command Separation**: Individual handlers for different command types
+
+### Project Structure
+```
+Discord_Music_Bot/
+├── run_bot.py                      # Main entry point
+├── bin/                            # Core bot modules
+│   ├── main.py                     # Bot runner and lifecycle management
+│   ├── events.py                   # Central event handler coordinator
+│   ├── player.py                   # Music playback functionality
+│   ├── presence_changer.py         # Dynamic bot status updates
+│   ├── weather_app.py              # Weather API integration
+│   └── on_message/                 # Message command handlers
+│       ├── play_commands.py        # Music commands ($play, $pause, etc.)
+│       ├── handle_shell_cmds.py    # Shell command execution
+│       ├── lucky_draw.py           # Daily fortune functionality
+│       ├── weather_cmd.py          # Weather command handler
+│       └── keyword_worker.py       # Keyword-based responses
+├── libs/                           # Shared libraries and configuration
+│   ├── global_vars.py              # Centralized variable management
+│   ├── key_loaders.py              # API key and token management
+│   └── vars/                       # Configuration variables
+└── cache/                          # Runtime cache and data
+    ├── gif_cache/                  # Resized GIF cache
+    └── draw_data.txt               # Daily fortune tracking
+```
 
 ## Dependencies
 
@@ -10,17 +43,20 @@
 
 ## Features
 
-    • Play Music: The bot can play music in a Discord voice channel using YouTube URLs or search queries, streaming audio instantly without waiting for full download.
-    • Queue Management: Users can add songs to the queue, and the bot will play them in order.
-    • Text Interface: The bot displays the current playing song in the Discord chat.
-    • Pause, Resume, Stop: Users can control playback with commands to pause, resume, or stop the current song.
-    • Queue Display: Users can check the current queue of songs.
-    • Keyword GIF & String Responses: The bot automatically responds to messages containing specific keywords with random GIFs or custom text responses, using whole-word matching (e.g., 'бира' but not 'разбирам').
-    • Dynamic keyword listing: The $key_words command now lists all keywords automatically from all keyword lists and mappings.
-    • Wednesday keyword logic: If a message contains a Wednesday-related keyword, the bot checks the current day and sends a GIF from its_wednesday or not_wednesday accordingly.
-    • All keyword and GIF/string mappings are grouped for easier maintenance and scalability.
-    • Weather Command: Use $weather <city> to get the current weather for a city (OpenWeatherMap API).
-    • Daily Fortune Draw: Use $kysmetche to draw a daily fortune (късметче). Each user can draw only once per day.
+### Music Functionality
+    • Play Music: Stream music in Discord voice channels using YouTube URLs or search queries, with instant playback
+    • Queue Management: Add multiple songs to queue with automatic sequential playback
+    • Playback Controls: Pause, resume, and stop commands for full playback control
+    • Queue Display: View current song queue with $queue command
+    • Voice State Management: Automatic queue continuation when users leave voice channels
+
+### Interactive Features
+    • Keyword Responses: Automatic GIF and text responses to specific keywords with intelligent whole-word matching
+    • Dynamic GIF Processing: All GIFs are resized (120x120) and cached for optimal Discord performance
+    • Wednesday Logic: Special day-aware responses for Wednesday-related keywords
+    • Weather Integration: Real-time weather data via $weather <city> command (OpenWeatherMap API)
+    • Daily Fortune Draw: $kysmetche command for daily fortune draws with per-user tracking
+    • Shell Command Execution: Secure whitelisted shell command execution via Discord
 
 ## To Do
 
@@ -29,28 +65,49 @@
     - Drink more water
     - Enjoy life
 
-## Done
+### Music Commands
+- `$play <song/URL>` - Play music from YouTube
+- `$pause` - Pause current playback
+- `$resume` - Resume paused playback  
+- `$stop` - Stop playback and clear queue
+- `$queue` - Display current song queue
 
-    - Implemented search function.
-    - Implemented queues for managing multiple songs.
-    - Implemented a text interface to display the currently playing song in Discord.
-    - Refactored keyword mapping logic for maintainability and scalability.
-    - Added dynamic keyword listing and Wednesday logic.
-    - Added weather command with OpenWeatherMap API integration.
-    - Added daily fortune draw command ($kysmetche) with per-user tracking.
-    - Moved command prefix list to bot_map.py for easier management.
+### Utility Commands
+- `$weather <city>` - Get current weather for specified city
+- `$kysmetche` - Draw daily fortune (once per day per user)
+- `$key_words` - List all available keyword triggers
+- `$commands` - Show all available commands
+- `$cmds` - List available shell commands
 
-## Usage
+## Setup and Usage
 
-    1. Make sure to have the required dependencies installed.
-    2. Store your Discord bot token in a file named bot_keys.
-    3. Run the script, and the bot will be ready to join voice channels and play music.
+    1. Install dependencies: `pip install -r requirements.txt`
+    2. Configure your Discord bot token in the appropriate configuration file
+    3. Set up OpenWeatherMap API key for weather functionality
+    4. Run the bot: `python run_bot.py`
+    5. Invite the bot to your Discord server with appropriate permissions
+
+## Configuration
+
+The bot uses a modular configuration system:
+- **Global Variables**: Managed through `libs/global_vars.py`
+- **API Keys**: Handled via `libs/key_loaders.py`
+- **Command Permissions**: Configured in the security modules
+- **Keyword Responses**: Customizable through the vars system
+
+## Migration from v1.x
+
+Version 2.0.0 represents a complete architectural overhaul:
+- **Breaking Change**: The monolithic `LoFi_bot.py` is deprecated
+- **User Experience**: All commands and functionality remain identical
+- **Development**: New modular structure for easier maintenance and feature additions
+- **Legacy**: Old bot file kept as reference template
 
 ## Notes
-- The bot streams audio directly from YouTube for fast playback and does not download the full video by default.
-- All GIFs triggered by keywords are resized and cached for less chat spam and faster response.
-- If you want to change the streaming or download behavior, adjust the `yt_dl_opts` dictionary in `LoFi_bot.py`.
-- The $kysmetche command allows each user to draw a fortune only once per day; attempts to draw again will be denied.
-- Command prefixes are now managed in bot_map.py for easier updates.
+- Audio streams directly from YouTube for instant playback without full downloads
+- GIF responses are automatically resized and cached for optimal performance  
+- All modules inherit from the `VARS` class for shared configuration access
+- The modular architecture allows for independent testing and development of features
+- Security features prevent unauthorized shell command execution
 
-**Feel free to explore and modify the code based on your preferences and requirements. If you encounter any issues or have suggestions, please feel free to contribute or open an issue.**
+**Feel free to explore and modify the code based on your preferences and requirements. The modular structure makes it easy to extend functionality or customize behavior. If you encounter any issues or have suggestions, please feel free to contribute or open an issue.**

@@ -1,5 +1,55 @@
 # CHANGELOG
 
+## [2.0.0] - 2025-08-07
+### MAJOR OVERHAUL - Complete Architecture Restructure
+This version represents a complete rewrite and modularization of the Discord Music Bot, moving from a monolithic structure to a clean, modular architecture.
+
+### Added
+- **Modular Architecture**: Complete restructure of codebase into separate, specialized modules
+- **Event Handlers System**: New `EventHandlers` class in `bin/events.py` for centralized event management
+- **Player Module**: Dedicated `Player` class in `bin/player.py` for music playback functionality
+- **Command Modules**: Separate handlers for different command types:
+  - `on_message/play_commands.py` - Music playback commands ($play, $pause, $resume, $stop, $queue)
+  - `on_message/handle_shell_cmds.py` - Shell command execution and security
+  - `on_message/lucky_draw.py` - Daily fortune draw functionality ($kysmetche)
+  - `on_message/weather_cmd.py` - Weather command handling ($weather)
+  - `on_message/keyword_worker.py` - Keyword-based GIF and string responses
+- **Global Variables System**: Centralized variable management through `libs/global_vars.py` with `VARS` class inheritance
+- **Bot Runner**: New `BotRunner` class in `bin/main.py` for bot lifecycle management
+- **Presence Changer**: Dedicated `Presence` class for dynamic bot status updates
+- **Weather Integration**: Full weather functionality with OpenWeatherMap API integration
+- **Shell Command Security**: Improved security model for allowed/disallowed commands
+- **Self-Restart Capability**: Bot can restart its own service when triggered by specific messages
+
+### Changed
+- **Complete Code Restructure**: Moved from single-file `LoFi_bot.py` to modular architecture
+- **Inheritance Model**: All classes now inherit from `VARS` for shared configuration access
+- **Event Registration**: Dynamic event registration system for better organization
+- **Error Handling**: Improved error handling and logging across all modules
+- **Command Processing**: Streamlined command processing with dedicated handlers
+- **Voice State Management**: Enhanced voice state updates for better music continuity
+- **GIF Processing**: Consolidated GIF resizing and caching into `KeywordWorker`
+- **Configuration Management**: Centralized all bot configuration and variables
+
+### Technical Improvements
+- **Separation of Concerns**: Each functionality now has its own dedicated module
+- **Code Reusability**: Shared functionality through inheritance and composition
+- **Maintainability**: Much easier to maintain, debug, and extend individual features
+- **Performance**: Better resource management and reduced memory footprint
+- **Scalability**: Modular structure allows for easy feature additions
+- **Testing**: Individual modules can be tested independently
+
+### Removed
+- **LoFi_bot.py**: Deprecated monolithic bot file (kept in the historical branch)
+- **Hardcoded Variables**: Moved all hardcoded values to centralized configuration
+- **Duplicate Code**: Eliminated code duplication across functionality
+
+### Migration Notes
+- This is a breaking change from previous versions
+- All functionality remains the same from user perspective
+- Developers should use the new modular structure for any modifications
+- The old `LoFi_bot.py` removed and the new `run_bot.py` should be used to start the bot
+
 ## [1.1.7]
 ### Added
 - $kysmetche command: Users can now draw a daily fortune ("късметче").

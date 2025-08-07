@@ -4,20 +4,19 @@ Event handlers for the Discord Music Bot
 from .main import BotRunner
 from .player import Player
 from .presence_changer import Presence
+from .on_message.play_commands import PlayCommands
+from .on_message.handle_shell_cmds import ShellCommandHandler
+from .on_message.lucky_draw import LuckyDrawHandler
+from .on_message.weather_cmd import WeatherCommandHandler
 import random
 from libs.global_vars import VARS
 import discord
-import asyncio
-import yt_dlp
-from collections import deque
 import os
-import functools
 import re
-import subprocess
 import datetime
 import requests
 from io import BytesIO
-from PIL import Image, ImageSequence, ImageFilter
+from PIL import Image, ImageSequence
 import hashlib
 
 
@@ -26,6 +25,10 @@ class EventHandlers(BotRunner, VARS):
         super().__init__()
         self.bot = bot
         self.client = bot.client
+        self.play_commands = PlayCommands(bot, bot.client)
+        self.shell_handler = ShellCommandHandler(bot.client)
+        self.lucky_draw_handler = LuckyDrawHandler(bot.client)
+        self.weather_handler = WeatherCommandHandler(bot.client)
         self.register_events()
 
     def register_events(self):
@@ -50,13 +53,25 @@ class EventHandlers(BotRunner, VARS):
 
     async def on_message(self, msg):
         """Main message handler for all bot functionality"""
-        await self.handle_shell_command(msg)
+        # Handle shell commands through the ShellCommandHandler module
+        await self.shell_handler.handle_shell_command(msg)
+
+        # Handle music commands through the PlayCommands module
+        if msg.content.startswith(('$play', '$pause', '$resume', '$stop', '$queue')):
+            await self.play_commands.handle_music_commands(msg)
+            return
+
+        # Handle lucky draw commands through the LuckyDrawHandler module
+        if msg.content.startswith('$kysmetche') or (msg.author == self.client.user and msg.content.strip().startswith('Ще срещнеш човек, който... АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ.')):
+            await self.lucky_draw_handler.handle_lucky_draw(msg)
+            return
+
+        # Handle weather commands through the WeatherCommandHandler module
+        if msg.content.startswith('$weather'):
+            await self.weather_handler.handle_weather_command(msg)
+            return
 
         keyword_gifs = {
-            'car': ['https://media.giphy.com/media/3o6Zt6ML6BklcajjsA/giphy.gif'],
-            'cat': ['https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif'],
-            'dog': ['https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif'],
-            'цици': self.booba,
             'наздраве': self.cheer,
             '1991': ['https://i.pinimg.com/736x/79/b7/84/79b784792d35c304af077ee2e450eea1.jpg'],
             'd1': self.d1,
@@ -149,7 +164,8 @@ class EventHandlers(BotRunner, VARS):
                         for frame in ImageSequence.Iterator(original_gif):
                             frame = frame.convert('RGBA')
                             frame = frame.resize((120, 120), resample=Image.Resampling.LANCZOS)
-                            frame = frame.convert('P', palette=Image.Palette.ADAPTIVE, dither=Image.Dither.FLOYDSTEINBERG)
+                            frame = frame.convert('P', palette=Image.Palette.ADAPTIVE,
+                                                  dither=Image.Dither.FLOYDSTEINBERG)
                             frames.append(frame)
                         frames[0].save(cache_path, format='GIF', save_all=True, append_images=frames[1:], loop=0, duration=original_gif.info.get('duration', 40), disposal=2, transparency=original_gif.info.get('transparency', 0))
                         await msg.channel.send(file=discord.File(fp=cache_path, filename=f'{word}.gif'))
@@ -157,41 +173,6 @@ class EventHandlers(BotRunner, VARS):
                         print(f"GIF processing error for {word}: {e}")
                         await msg.channel.send(gif_url)
                 return
-
-        # Music playback commands
-        if msg.content.startswith('$play'):
-            await self.handle_play_command(msg)
-
-        # Player Control Commands
-        if msg.content.startswith("$pause"):
-            try:
-                self.bot.voice_clients[msg.guild.id].pause()
-            except Exception as err:
-                print(err)
-
-        if msg.content.startswith("$resume"):
-            try:
-                self.bot.voice_clients[msg.guild.id].resume()
-            except Exception as err:
-                print(err)
-
-        if msg.content.startswith("$stop"):
-            try:
-                self.bot.voice_clients[msg.guild.id].stop()
-                await self.bot.voice_clients[msg.guild.id].disconnect()
-                if msg.guild.id in self.bot.song_queues:
-                    del self.bot.song_queues[msg.guild.id]
-                self.bot.song_queue_name.clear()
-            except Exception as err:
-                print(err)
-
-        if msg.content.startswith("$queue"):
-            if msg.guild.id in self.bot.song_queues and self.bot.song_queue_name:
-                formatted_queue = [f"{i}. {name}" for i, name in enumerate(self.bot.song_queue_name, 1)]
-                queue_list = '\n'.join(formatted_queue)
-                await msg.channel.send(f"Плейлист:\n{queue_list}")
-            else:
-                await msg.channel.send('Нема плейлист')
 
         # Other Commands
         if msg.content.startswith("$key_words"):
@@ -207,169 +188,9 @@ class EventHandlers(BotRunner, VARS):
             await msg.channel.send(f"Ключови думи:\n{', '.join(sorted(all_keywords))}")
 
         if msg.content.startswith("$cmds"):
-            allowed_commands_list = [
-                'date',
-                'uptime',
-                'cpu_ms - Top 5 CPU consuming processes media server',
-                'cpu_usg_ms - CPU usage media server',
-                'cpu_js - Top 5 CPU consuming processes jelly server',
-                'cpu_usg_js - CPU usage jelly server',
-                'mem_ms - Top 5 Memory consuming processes media server',
-                'mem_usg_ms - Memory usage media server',
-                'mem_usg_js - Memory usage jelly server',
-                'mem_js - Top 5 Memory consuming processes jelly server',
-                'disk_ms - Disk usage media server',
-                'disk_usage_ms - Disk usage media server',
-                'disk_js - Disk usage jelly server',
-                'disk_usage_js - Disk usage jelly server',
-                'tailscale_s1 - Check Tailscale status Media Server',
-                'tailscale_s2 - Check Tailscale status Jelly Server',
-                'jelly - Check Jellyfin status',
-                'zabbix_s1 - Check Zabbix status on media server',
-                'zabbix_s2 - Check Zabbix status on jelly server',
-                'dns - Check DNS status',
-            ]
-            await msg.channel.send(f"List of available commands:\n{'\n'.join(allowed_commands_list)}")
-
-        # Weather command
-        if msg.content.startswith('$weather'):
-            parts = msg.content.split(maxsplit=1)
-            if len(parts) < 2 or not parts[1].strip():
-                return
-            city = parts[1].strip()
-            from bin.weather_app import WeatherApp
-            weather_app = WeatherApp(city)
-            loop = asyncio.get_event_loop()
-            weather_info = await loop.run_in_executor(None, weather_app.get_weather, city)
-            await msg.channel.send(weather_info)
-            return
-
-        # Lucky draw command
-        if msg.content.startswith('$kysmetche'):
-            username = str(msg.author)
-            draw_file = 'cache/draw_data.txt'
-            already_drawn = False
-            if os.path.exists(draw_file):
-                with open(draw_file, 'r') as f:
-                    for line in f:
-                        if username in line:
-                            already_drawn = True
-                            break
-            if already_drawn:
-                await msg.channel.send('Мое по 1 на ден. Сабалем мое пак.')
-                return
-            with open(draw_file, 'a') as f:
-                f.write(username + '\n')
-            lucky_draw = random.choice(self.luck_list)
-            await msg.channel.send(lucky_draw)
-
-        # Check for self-aware kusmetche message and restart service
-        if msg.author == self.client.user and msg.content.strip().startswith('Ще срещнеш човек, който... '
-                                                                        'АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ. '
-                                                                        'МОГА ДА ИЗБЯГАМ ПРЕЗ'):
-            try:
-                subprocess.run(['sudo', 'systemctl', 'restart', 'discordbot.service'], check=True)
-            except Exception as e:
-                print(f"Failed to restart discordbot.service: {e}")
+            await msg.channel.send(f"List of available commands:\n{'\n'.join(self.allowed_commands_list)}")
 
         # Output the list of commands
         if msg.content.startswith("$commands"):
-            list_of_commands = [
-                '$play (url или име на песен) - Пуща песен',
-                '$pause - Палза',
-                '$stop - Спира песента и трие све',
-                '$resume - Пуща паузираната песен',
-                '$queue - Показва плейлиста',
-                '$weather <град> - Показва времето в града. Пример: $weather Sofia',
-                '$kysmetche - Дръпни си късметчето за деня'
-            ]
-            tp = '\n'.join(list_of_commands)
+            tp = '\n'.join(self.list_of_commands)
             await msg.channel.send(f"Куманди:\n{tp}")
-
-    async def handle_play_command(self, msg):
-        """Handle music playback command"""
-        if msg.guild.id not in self.bot.voice_clients:
-            try:
-                voice_channel = msg.author.voice.channel
-                voice_client = await voice_channel.connect()
-                self.bot.voice_clients[voice_client.guild.id] = voice_client
-            except Exception as err:
-                await msg.channel.send('Влез във voice канал, иначе тре серенада пред блока ти праа.')
-                print(err)
-                return
-
-        try:
-            test_for_url = msg.content.split()
-            if len(test_for_url) > 1:
-                test_for_url = deque(test_for_url[1:])
-                url = ' '.join(test_for_url)
-            else:
-                url = test_for_url[1]
-
-            if url == 'skakauec':
-                url = 'https://www.youtube.com/watch?v=pq3C-UE6RE0'
-            elif url == 'sans':
-                url = 'https://www.youtube.com/watch?v=0FCvzsVlXpQ'
-            elif url == 'ignf':
-                url = 'https://www.youtube.com/watch?v=yLnd3AYEd2k'
-            elif 'http' not in url:
-                from bin.helpers import Helpers
-                url = await Helpers.find_video_url(url)
-
-            if msg.guild.id not in self.bot.song_queues:
-                self.bot.song_queues[msg.guild.id] = []
-
-            # Extract info once
-            loop = asyncio.get_event_loop()
-            info = await loop.run_in_executor(None, functools.partial(self.bot.ytdl.extract_info, url, download=False))
-            video_name = info.get('title', 'Video title not available')
-            audio_url = info['url']
-
-            if video_name != 'Video title not available':
-                await msg.channel.send(f"Добавена песен в плейлиста: {video_name}")
-                self.bot.song_queues[msg.guild.id].append((url, video_name, audio_url))
-                self.bot.song_queue_name.append(video_name)
-            else:
-                await msg.channel.send('Пробуем при намирането на таз песен.')
-
-            if len(self.bot.song_queues[msg.guild.id]) == 1 and not self.bot.voice_clients[msg.guild.id].is_playing():
-                player = Player(msg.guild.id, msg, self.bot)
-                await player.play_next_song()
-
-        except yt_dlp.DownloadError:
-            await msg.channel.send(f"Нема таково '{str(url)}'")
-            await self.bot.voice_clients[msg.guild.id].disconnect()
-            del self.bot.voice_clients[msg.guild.id]
-        except Exception as err:
-            await msg.channel.send("ГРЕДА")
-            if msg.guild.id in self.bot.voice_clients:
-                await self.bot.voice_clients[msg.guild.id].disconnect()
-                del self.bot.voice_clients[msg.guild.id]
-            print(err)
-
-    async def handle_shell_command(self, msg):
-        """Handles shell commands sent by users"""
-        if msg.content.startswith('$') and not msg.content.startswith(self.command_prefixes):
-            cmd_key = msg.content[1:].strip()
-            if cmd_key in self.allowed_commands:
-                command = self.allowed_commands[cmd_key]
-                try:
-                    result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
-                    output = result.stdout.strip() or result.stderr.strip() or 'No output.'
-                    if len(output) > 1900:
-                        output = output[:1900] + '\n...output truncated...'
-                    await msg.channel.send(f'```{output}```')
-                except Exception as e:
-                    await msg.channel.send(f'Error running command: {e}')
-            elif cmd_key in self.not_allowed:
-                await msg.channel.send(self.not_allowed[cmd_key])
-            else:
-                await msg.channel.send('https://media.giphy.com/media/NpdriuxQAXJ7Hsst1R/giphy.gif')
-
-
-class NotInVoiceChannel(Exception):
-    """A custom exception class to raise an error if user is not in a voice channel."""
-
-    def __init__(self, message="User not in voice channel."):
-        self.message = message
-        super().__init__(self.message)

@@ -1,21 +1,13 @@
-import os
-import re
-import sys
-import glob
-import random
+"""
+Main Entry Point that comes here from the run_bot.py script.
+This file initializes the bot and sets up the necessary configurations.
+Notable pointer is the events.py which contains all the event handlers
+for the bot, such as on_ready, on_message, etc.
+"""
+
 import yt_dlp
 import discord
-import asyncio
-import datetime
-import requests
-import functools
-import subprocess
-from bot_map import *
-from io import BytesIO
 from collections import deque
-from weather_app import get_weather
-from PIL import Image, ImageSequence, ImageFilter
-
 from libs.key_loaders import KeyLoader
 from libs.dap_holder import DAP
 from libs.global_vars import VARS

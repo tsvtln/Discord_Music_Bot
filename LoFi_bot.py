@@ -181,7 +181,7 @@ async def on_message(msg):
             gif_list = not_wednesday
         gif_url = random.choice(gif_list)
         import hashlib
-        cache_dir = 'gif_cache'
+        cache_dir = 'cache/gif_cache'
         os.makedirs(cache_dir, exist_ok=True)
         url_hash = hashlib.md5(gif_url.encode('utf-8')).hexdigest()
         cache_path = os.path.join(cache_dir, f'wednesday_{url_hash}.gif')
@@ -210,7 +210,7 @@ async def on_message(msg):
             gif_url = random.choice(gif_list)
             # Use a filename based on the keyword and a hash of the URL to avoid collisions
             import hashlib
-            cache_dir = 'gif_cache'
+            cache_dir = 'cache/gif_cache'
             os.makedirs(cache_dir, exist_ok=True)
             url_hash = hashlib.md5(gif_url.encode('utf-8')).hexdigest()
             cache_path = os.path.join(cache_dir, f'{word}_{url_hash}.gif')

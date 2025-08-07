@@ -1,3 +1,10 @@
+"""
+This module contains helper functions for the Discord Music Bot.
+It includes functions for retrieving video names from YouTube URLs,
+finding video URLs based on search queries, and cleaning up files.
+It also includes a class to suppress YouTube messages in the console output.
+"""
+
 import functools
 from libs.dap_holder import DAP
 import yt_dlp

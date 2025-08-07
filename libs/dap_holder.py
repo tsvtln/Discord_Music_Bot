@@ -1,3 +1,8 @@
+"""
+Holder for DAP (Discord Audio Player) options.
+This class provides static methods to retrieve options for youtube-dl and ffmpeg.
+"""
+
 class DAP:
 
     @staticmethod

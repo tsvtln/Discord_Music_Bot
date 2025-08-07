@@ -1,3 +1,7 @@
+"""
+WeatherApp class to fetch weather data from OpenWeatherMap API.
+"""
+
 import requests
 from decouple import config
 

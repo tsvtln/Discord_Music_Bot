@@ -6,6 +6,7 @@ It also includes a class to suppress YouTube messages in the console output.
 """
 
 import functools
+
 from libs.dap_holder import DAP
 import yt_dlp
 import asyncio
@@ -13,9 +14,10 @@ from libs.global_vars import VARS
 import os
 import glob
 import sys
+from datetime import datetime, timedelta
 
 
-class Helpers:
+class Helpers(VARS):
     @staticmethod
     # helper functions to get video name from YouTube URL
     def get_video_name_sync(youtube_url):  # blocking version for thread
@@ -59,6 +61,26 @@ class Helpers:
             os.remove(file)
             print(f"Cleared {file} from local repo")
 
+    @staticmethod
+    def time_now_to_seconds():
+        time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        time_split = time_now.split('-')
+        hours, minute, second = time_split[3:]
+        total_time = int(hours) * 3600 + int(minute) * 60 + int(second)
+        day = int(time_split[2])
+        return total_time, day
+
+    @staticmethod
+    def anti_spam_check(time_last, day):
+        """ checks if the time difference is less than 5 minutes"""
+        current_time_to_seconds, day_now = Helpers.time_now_to_seconds()
+        if time_last + VARS.timeout <= current_time_to_seconds or day != day_now:
+            return True
+        return False
+
+    def last_message(self):
+        """Sets last message time and day"""
+        self.last_message_delta, self.last_message_date = Helpers.time_now_to_seconds()
 
 class SuppressYouTubeMessages:
     """ redirects [youtube] blablabla messages to dev/null"""

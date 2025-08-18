@@ -11,6 +11,7 @@ from PIL import Image, ImageSequence
 import hashlib
 import discord
 from libs.global_vars import VARS
+from bin.helpers import Helpers
 
 
 class KeywordWorker(VARS):
@@ -94,8 +95,13 @@ class KeywordWorker(VARS):
         # Then, check for GIF responses
         for word, gif_list in keyword_gifs.items():
             if re.search(rf'\b{re.escape(word)}\b', lowered):
+                # Anti-spam check
+                if not Helpers.anti_spam_check(self.last_message_delta, self.last_message_date):
+                    return False
+
                 gif_url = random.choice(gif_list)
                 await self._process_and_send_gif(msg, gif_url, word)
+                Helpers.last_message(self)
                 return True
 
         return False
@@ -130,6 +136,8 @@ class KeywordWorker(VARS):
 
     async def handle_keyword_commands(self, msg):
         """Handle keyword-related commands like $key_words"""
+
+
         if msg.content.startswith("$key_words"):
             # Build keyword list from all sources
             keyword_gifs = {

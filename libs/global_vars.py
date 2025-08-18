@@ -13,6 +13,9 @@ class VARS:
 
     files_to_clean = []
     response_num = 0
+    last_message_delta = 0
+    last_message_date = 0
+    timeout = 300
 
     # --- Keyword GIF and string auto-response ---
     beer_keywords = ['бири', 'бира', 'bira', 'biri', 'beer']

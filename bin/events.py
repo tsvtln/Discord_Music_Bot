@@ -57,7 +57,10 @@ class EventHandlers(BotRunner, VARS):
             return
 
         # Handle lucky draw commands through the LuckyDrawHandler module
-        if msg.content.startswith('$kysmetche') or (msg.author == self.client.user and msg.content.strip().startswith('Ще срещнеш човек, който... АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ.')):
+        if (msg.content.startswith('$kysmetche') or
+                (
+                        msg.author == self.client.user and
+                        msg.content.strip().startswith('Ще срещнеш човек, който... АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ.'))):
             await self.lucky_draw_handler.handle_lucky_draw(msg)
             return
 

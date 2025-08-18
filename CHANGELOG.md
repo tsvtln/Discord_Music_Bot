@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [2.0.1] - 2025-08-18
+### Feature Enhancements
+- GIF messages now timeout for 5 minutes to avoid spam
+- Added `$weather5 <city>` command for 5-day weather forecast
+- Added the new command to the `$commands` list
+
 ## [2.0.0] - 2025-08-07
 ### MAJOR OVERHAUL - Complete Architecture Restructure
 This version represents a complete rewrite and modularization of the Discord Music Bot, moving from a monolithic structure to a clean, modular architecture.

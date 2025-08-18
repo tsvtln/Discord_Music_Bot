@@ -21,3 +21,16 @@ class WeatherCommandHandler:
             weather_info = await loop.run_in_executor(None, weather_app.get_weather, city)
             await msg.channel.send(weather_info)
             return
+
+    async def handle_weather5_command(self, msg):
+        """Handle 5-day weather forecast command requests"""
+        if msg.content.startswith('$weather5'):
+            parts = msg.content.split(maxsplit=1)
+            if len(parts) < 2 or not parts[1].strip():
+                return
+            city = parts[1].strip()
+            weather_app = WeatherApp(city)
+            loop = asyncio.get_event_loop()
+            forecast_info = await loop.run_in_executor(None, weather_app.get_weather5, city)
+            await msg.channel.send(forecast_info)
+            return

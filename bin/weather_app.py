@@ -10,6 +10,7 @@ class WeatherApp:
     def __init__(self, city_name):
         self.API_KEY = config('WEATHER_API_KEY')
         self.BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
+        self.FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast'
         self.city_name = city_name
 
     def get_weather(self, city_name):
@@ -46,3 +47,49 @@ class WeatherApp:
                     f"Ветър: {wind} m/s")
         except Exception as e:
             return f"Error fetching weather: {e}"
+
+    def get_weather5(self, city_name):
+        """
+        Fetches 5-day weather forecast for the given city using OpenWeatherMap API.
+        Returns a string with a summary for each day.
+        """
+        params = {
+            'q': city_name,
+            'appid': self.API_KEY,
+            'units': 'metric',
+            'lang': 'en',
+        }
+        try:
+            response = requests.get(self.FORECAST_URL, params=params, timeout=5)
+            data = response.json()
+            if response.status_code != 200 or 'list' not in data:
+                return 'Не намирам града или използвани 60/60 проверки за деня.'
+            # Group forecasts by date
+            from collections import defaultdict
+            import datetime
+            days = defaultdict(list)
+            for entry in data['list']:
+                dt = datetime.datetime.fromtimestamp(entry['dt'])
+                date_str = dt.strftime('%Y-%m-%d')
+                days[date_str].append(entry)
+            # Prepare a summary for each day (show up to 5 days)
+            result = []
+            city = data['city']['name']
+            country = data['city']['country']
+            for i, (date, entries) in enumerate(sorted(days.items())):
+                if i >= 5:
+                    break
+                # Pick the forecast closest to 12:00
+                target_hour = 12
+                closest = min(entries, key=lambda e: abs(datetime.datetime.fromtimestamp(e['dt']).hour - target_hour))
+                weather = closest['weather'][0]['description'].capitalize()
+                temp = closest['main']['temp']
+                feels_like = closest['main']['feels_like']
+                humidity = closest['main']['humidity']
+                wind = closest['wind']['speed']
+                result.append(
+                    f"{date}: {weather}, {temp}°C (кат {feels_like}°C), {humidity}% увлажнение, {wind} m/s вятър"
+                )
+            return f"5-дневна прогноза за {city}, {country}:\n" + "\n".join(result)
+        except Exception as e:
+            return f"Error fetching 5-day forecast: {e}"

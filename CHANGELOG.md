@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [2.0.2] - 2025-08-21
+### Fixes
+- Removed duplicated code for handling 5 days weather forecast in `$weather5` command
+
 ## [2.0.1] - 2025-08-18
 ### Feature Enhancements
 - GIF messages now timeout for 5 minutes to avoid spam

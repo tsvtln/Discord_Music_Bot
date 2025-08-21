@@ -66,11 +66,11 @@ class EventHandlers(BotRunner, VARS):
 
         # Handle weather commands through the WeatherCommandHandler module
         if msg.content.startswith('$weather5'):
-            await self.weather_handler.handle_weather5_command(msg)
+            await self.weather_handler.handle_weather_command(msg, 5)
             return
 
         if msg.content.startswith('$weather'):
-            await self.weather_handler.handle_weather_command(msg)
+            await self.weather_handler.handle_weather_command(msg, 1)
             return
 
         # Handle keyword-related commands

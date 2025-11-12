@@ -61,7 +61,7 @@ class LuckyDrawHandler(VARS):
 
             # drawn and wants to reroll but already did
             elif already_drawn and 'reroll' in msg.content and already_reroll:  # nh
-                await msg.channel.send('Вече си реролвап мършо!')
+                await msg.channel.send('Вече си реролвал мършо!')
 
         # Check for self-aware kusmetche message and restart service
         if msg.author == self.client.user and msg.content.strip().startswith('Ще срещнеш човек, който... '

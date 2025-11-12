@@ -10,6 +10,7 @@ beer = [
     'https://media.giphy.com/media/3oEjHNSN9EhhBi2QJq/giphy.gif',
     'https://media4.giphy.com/media/26tP21xUQnOCIIoFi/giphy.gif',
     'https://media.giphy.com/media/2AM7sBtPHGTL5r5WFV/giphy.gif',
+    'https://media3.giphy.com/media/AJmrZl2TrH2lvtwwQw/giphy.gif'
 ]
 
 cheer = [

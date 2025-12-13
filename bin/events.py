@@ -9,6 +9,9 @@ from .on_message.handle_shell_cmds import ShellCommandHandler
 from .on_message.lucky_draw import LuckyDrawHandler
 from .on_message.weather_cmd import WeatherCommandHandler
 from .on_message.keyword_worker import KeywordWorker
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from libs.daily_fact import get_today_fact
 import random
 from libs.global_vars import VARS
 import discord
@@ -24,7 +27,25 @@ class EventHandlers(BotRunner, VARS):
         self.lucky_draw_handler = LuckyDrawHandler(bot.client)
         self.weather_handler = WeatherCommandHandler(bot.client)
         self.keyword_worker = KeywordWorker(bot.client)
+        self.scheduler_started = False  # Prevent multiple schedulers
         self.register_events()
+
+    def start_fact_scheduler(self):
+        if getattr(self, '_fact_scheduler_started', False):
+            return
+        self._fact_scheduler_started = True
+        scheduler = AsyncIOScheduler()
+        # channel ids to post the daily fact to
+        CHANNEL_IDS = [305337312705904642, 1403142694317981836]
+
+        async def post_daily_fact():
+            fact = get_today_fact()
+            for c in CHANNEL_IDS:
+                channel = self.client.get_channel(c)
+                if channel:
+                    await channel.send(f"🧠 Daily Fact: {fact}")
+        scheduler.add_job(post_daily_fact, CronTrigger(hour=16, minute=20))
+        scheduler.start()
 
     def register_events(self):
         """Register all event handlers"""
@@ -43,6 +64,7 @@ class EventHandlers(BotRunner, VARS):
 
     async def on_ready(self):  # verifies that the bot is started and sets a bot status
         print(f"Bot is ready")
+        self.start_fact_scheduler()
         self.client.loop.create_task(Presence.change_presence_periodically(self))
         await self.client.change_presence(activity=discord.Game(name=random.choice(self.presence_states)))
 

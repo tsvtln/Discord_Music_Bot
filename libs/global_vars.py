@@ -15,7 +15,7 @@ class VARS:
     response_num = 0
     last_message_delta = 0
     last_message_date = 0
-    timeout = 300
+    timeout = 3000
 
     # --- Keyword GIF and string auto-response ---
     beer_keywords = ['бири', 'бира', 'bira', 'biri', 'beer']

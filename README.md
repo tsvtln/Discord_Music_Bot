@@ -75,7 +75,9 @@ Discord_Music_Bot/
 
 ### Utility Commands
 - `$weather <city>` - Get current weather for specified city
+- `$weather5 <city>` - Get 5-day weather forecast for specified city
 - `$kysmetche` - Draw daily fortune (once per day per user)
+- `$kysmetche reroll` - Reroll daily fortune (once per day per user)
 - `$key_words` - List all available keyword triggers
 - `$commands` - Show all available commands
 - `$cmds` - List available shell commands

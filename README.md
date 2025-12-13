@@ -57,6 +57,7 @@ Discord_Music_Bot/
     • Weather Integration: Real-time weather data via $weather <city> command (OpenWeatherMap API)
     • Daily Fortune Draw: $kysmetche command for daily fortune draws with per-user tracking
     • Shell Command Execution: Secure whitelisted shell command execution via Discord
+    • Random Daily Fact: Automatic posting of a random fact every day
 
 ## To Do
 
@@ -109,5 +110,26 @@ Version 2.0.0 represents a complete architectural overhaul:
 - All modules inherit from the `VARS` class for shared configuration access
 - The modular architecture allows for independent testing and development of features
 - Security features prevent unauthorized shell command execution
+
+## Random Daily Fact Feature
+
+- The bot now posts a random real-world fact every day at a scheduled time (default: 16:20, configurable) to one or more channels.
+- Facts are fetched from the Useless Facts API, with local fallback facts if the API is unavailable.
+- All facts for the day are tracked in `cache/fact_data.txt` to avoid repeats.
+- The feature is implemented using APScheduler and is fully automated—no user command required.
+
+### How it works
+- At the scheduled time, the bot posts a fact to the configured channels.
+- If a fact for today already exists, a new unique fact is fetched (up to 50 tries, then a fallback is used).
+- To change the post time or channels, edit the scheduler setup in `bin/events.py`.
+
+### Example
+```
+🧠 Daily Fact: Bananas are berries, but strawberries are not.
+```
+
+### Configuration
+- Channel IDs and post time are set in `bin/events.py` in the `start_fact_scheduler` method.
+- Facts are stored in `cache/fact_data.txt`.
 
 **Feel free to explore and modify the code based on your preferences and requirements. The modular structure makes it easy to extend functionality or customize behavior. If you encounter any issues or have suggestions, please feel free to contribute or open an issue.**

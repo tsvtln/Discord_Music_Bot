@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [2.0.3] - 2025-12-13
+### Added
+- **Random Daily Fact Feature**: The bot now posts a random real-world fact every day at a scheduled time to one or more channels.
+    - Facts are fetched from the Useless Facts API, with local fallback facts if the API is unavailable.
+    - All facts for the day are tracked in `cache/fact_data.txt` to avoid repeats.
+    - The feature is implemented using APScheduler and is fully automated—no user command required.
+    - To change the post time or channels, edit the scheduler setup in `bin/events.py`.
+
 ## [2.0.2] - 2025-08-21
 ### Fixes
 - Removed duplicated code for handling 5 days weather forecast in `$weather5` command

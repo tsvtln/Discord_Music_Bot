@@ -10,6 +10,7 @@ It sets up the bot, registers event handlers, and starts the bot client.
 from bin.main import BotRunner
 from bin.events import EventHandlers
 from bin.helpers import SuppressYouTubeMessages
+from libs.key_loaders import KeyLoader
 import sys
 
 # Create bot instance
@@ -22,4 +23,4 @@ events = EventHandlers(bot)
 # Run the bot
 if __name__ == "__main__":
     sys.stdout = SuppressYouTubeMessages()  # Stops the spam from yt-dlp
-    client.run(bot.key)
+    client.run(KeyLoader.bot_key())

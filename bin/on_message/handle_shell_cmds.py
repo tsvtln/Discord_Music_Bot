@@ -14,7 +14,12 @@ class ShellCommandHandler(VARS):
 
     async def handle_shell_command(self, msg):
         """Handles shell commands sent by users"""
-        if msg.content.startswith('$') and not msg.content.startswith(self.command_prefixes):
+        # Do not process the bot's own messages
+        if msg.author == self.client.user:
+            return
+        # Ensure command_prefixes is a tuple of strings for startswith
+        prefixes = tuple(self.command_prefixes) if isinstance(self.command_prefixes, (list, tuple)) else (self.command_prefixes,)
+        if msg.content.startswith('$') and not msg.content.startswith(prefixes):
             cmd_key = msg.content[1:].strip()
             if cmd_key in self.allowed_commands:
                 command = self.allowed_commands[cmd_key]

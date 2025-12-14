@@ -6,7 +6,7 @@ class VARS:
     from .vars.gifs import beer, cheer, booba, kur, usl, its_wednesday, not_wednesday, d1
     from .vars.presence_states import presence_states
     from .vars.os_commands import user, server, allowed_commands, not_allowed
-    from .vars.lucky_list import luck_list
+    from .vars.lucky_list import lucky_list
     from .vars.funny_responses import list_of_funny_not_allowed
     from .vars.responses import bot_keywords as bot_responses
     from .vars.responses import haralampi_keywords as haralampi_responses
@@ -15,51 +15,84 @@ class VARS:
     response_num = 0
     last_message_delta = 0
     last_message_date = 0
-    timeout = 3000
 
-    # --- Keyword GIF and string auto-response ---
-    beer_keywords = ['бири', 'бира', 'bira', 'biri', 'beer']
-    kur_keywords = ['кур', 'курец', 'курове', 'кура', 'kur', 'kure', 'kura']
-    usl_keywords = ['useless', 'uselessa', 'юслес', 'юслеса', 'ангел', 'ачо', 'a4o']
-    bot_keywords = ['бот', 'бота', 'ботче', 'bot', 'bota']
-    haralampi_keywords = ['haralampi', 'харалампи']
-    wednesday_keywords = ['сряда', 'срядата', 'wednesday', 'wensday', 'wendesday', 'srqda']
-    d1_keywords = ['day1']
-    booba_keywords = ['цици', 'цици', 'цицки', 'boobs', 'cici']
+    # Load timeout from DB config (fallback to 3000 if not set)
+    @staticmethod
+    def _load_timeout() -> int:
+        try:
+            # Local import to avoid circular dependencies
+            from bin.db_helpers import DBHelpers
+            row = DBHelpers.fetch_one(
+                "SELECT config_value FROM config WHERE config_key = %s LIMIT 1",
+                ("timeout",)
+            )
+            if row and row[0]:
+                try:
+                    return int(row[0])
+                except ValueError:
+                    return 3000
+            return 3000
+        except Exception:
+            return 3000
 
-    # --- Allowed OS commands list ---
-    allowed_commands_list = [
-        'date',
-        'uptime',
-        'cpu_ms - Top 5 CPU consuming processes media server',
-        'cpu_usg_ms - CPU usage media server',
-        'cpu_js - Top 5 CPU consuming processes jelly server',
-        'cpu_usg_js - CPU usage jelly server',
-        'mem_ms - Top 5 Memory consuming processes media server',
-        'mem_usg_ms - Memory usage media server',
-        'mem_usg_js - Memory usage jelly server',
-        'mem_js - Top 5 Memory consuming processes jelly server',
-        'disk_ms - Disk usage media server',
-        'disk_usage_ms - Disk usage media server',
-        'disk_js - Disk usage jelly server',
-        'disk_usage_js - Disk usage jelly server',
-        'tailscale_s1 - Check Tailscale status Media Server',
-        'tailscale_s2 - Check Tailscale status Jelly Server',
-        'jelly - Check Jellyfin status',
-        'zabbix_s1 - Check Zabbix status on media server',
-        'zabbix_s2 - Check Zabbix status on jelly server',
-        'dns - Check DNS status',
-    ]
+    timeout = _load_timeout()
 
-    # --- List of commands for the bot ---
-    list_of_commands = [
-        '$play (url или име на песен) - Пуща песен',
-        '$pause - Палза',
-        '$stop - Спира песента и трие све',
-        '$resume - Пуща паузираната песен',
-        '$queue - Показва плейлиста',
-        '$weather <град> - Показва времето в града. Пример: $weather Sofia',
-        '$weather5 <град> - Показва 5-дневна прогноза за времето в града. Пример: $weather5 Sofia',
-        '$kysmetche - Дръпни си късметчето за деня',
-        '$kysmetche reroll - Ако вече си дръпнал късметче, можеш да си го реролнеш'
-    ]
+    # Helper to load keywords by group_name
+    @staticmethod
+    def _load_keywords(group_name: str) -> list[str]:
+        try:
+            from bin.db_helpers import DBHelpers
+            rows = DBHelpers.fetch_all(
+                "SELECT k.keyword FROM keywords k JOIN keyword_groups g ON k.group_id = g.id "
+                "WHERE g.group_name = %s AND k.enabled = TRUE",
+                (group_name,)
+            )
+            return [row[0] for row in rows]
+        except Exception:
+            return []
+
+    # --- Keyword GIF and string auto-response (DB-backed) ---
+    beer_keywords = _load_keywords('beer')
+    kur_keywords = _load_keywords('kur')
+    usl_keywords = _load_keywords('usl')
+    bot_keywords = _load_keywords('bot')
+    haralampi_keywords = _load_keywords('haralampi')
+    wednesday_keywords = _load_keywords('wednesday')
+    d1_keywords = _load_keywords('d1')
+    booba_keywords = _load_keywords('booba')
+
+    @staticmethod
+    def _load_allowed_commands_list() -> list[str]:
+        try:
+            from bin.db_helpers import DBHelpers
+            rows = DBHelpers.fetch_all(
+                "SELECT command, description FROM allowed_commands_list ORDER BY id ASC",
+                ()
+            )
+            formatted = []
+            for cmd, desc in rows:
+                if desc is None or str(desc).strip() == "":
+                    formatted.append(cmd)
+                else:
+                    formatted.append(f"{cmd} - {desc}")
+            return formatted
+        except Exception:
+            return []
+
+    # --- Allowed OS commands list (DB-backed) ---
+    allowed_commands_list = _load_allowed_commands_list()
+
+    @staticmethod
+    def _load_list_of_commands() -> list[str]:
+        try:
+            from bin.db_helpers import DBHelpers
+            rows = DBHelpers.fetch_all(
+                "SELECT command, description FROM list_of_commands ORDER BY id ASC",
+                ()
+            )
+            return [f"{cmd} {desc}" for (cmd, desc) in rows]
+        except Exception:
+            return []
+
+    # --- List of commands for the bot (DB-backed) ---
+    list_of_commands = _load_list_of_commands()

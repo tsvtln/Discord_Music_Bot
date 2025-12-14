@@ -163,3 +163,4 @@ Discord_Music_Bot/bot_keys
 *.opus
 cache/gif_cache/*
 cache/*
+conf/bot.conf

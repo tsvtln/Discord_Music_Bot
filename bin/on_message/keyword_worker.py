@@ -2,7 +2,6 @@
 Keyword worker for handling GIF and string responses based on keywords
 """
 import random
-import os
 import re
 import datetime
 import requests
@@ -25,6 +24,10 @@ class KeywordWorker(VARS):
 
     async def handle_keyword_responses(self, msg):
         """Handle all keyword-based responses (GIFs and strings)"""
+        # Do not process the bot's own messages to avoid reacting to lucky draw outputs
+        if msg.author == self.client.user:
+            return False
+
         keyword_gifs = {
             'наздраве': self.cheer,
             '1991': ['https://i.pinimg.com/736x/79/b7/84/79b784792d35c304af077ee2e450eea1.jpg'],
@@ -107,32 +110,65 @@ class KeywordWorker(VARS):
         return False
 
     async def _process_and_send_gif(self, msg, gif_url, word):
-        """Process, resize and cache GIF, then send it"""
-        cache_dir = 'cache/gif_cache'
-        os.makedirs(cache_dir, exist_ok=True)
+        """Process, resize and cache GIF in DB, then send it"""
+        # Build a deterministic cache filename based on keyword and URL hash
         url_hash = hashlib.md5(gif_url.encode('utf-8')).hexdigest()
-        cache_path = os.path.join(cache_dir, f'{word}_{url_hash}.gif')
+        filename = f'{word}_{url_hash}.gif'
 
-        if os.path.exists(cache_path):
-            await msg.channel.send(file=discord.File(fp=cache_path, filename=f'{word}.gif'))
-        else:
+        # Local import to avoid circular deps
+        from bin.db_helpers import DBHelpers
+
+        # Try to fetch from DB cache
+        cached = DBHelpers.fetch_one(
+            "SELECT gif_data, mime_type, size_bytes FROM gif_cache WHERE filename = %s LIMIT 1",
+            (filename,)
+        )
+        if cached:
+            gif_data, mime_type, size_bytes = cached
             try:
-                response = requests.get(gif_url)
-                response.raise_for_status()
-                original_gif = Image.open(BytesIO(response.content))
-                frames = []
-                for frame in ImageSequence.Iterator(original_gif):
-                    frame = frame.convert('RGBA')
-                    frame = frame.resize((120, 120), resample=Image.Resampling.LANCZOS)
-                    frame = frame.convert('P', palette=Image.Palette.ADAPTIVE, dither=Image.Dither.FLOYDSTEINBERG)
-                    frames.append(frame)
-                frames[0].save(cache_path, format='GIF', save_all=True, append_images=frames[1:], loop=0,
-                               duration=original_gif.info.get('duration', 40), disposal=2,
-                               transparency=original_gif.info.get('transparency', 0))
-                await msg.channel.send(file=discord.File(fp=cache_path, filename=f'{word}.gif'))
+                await msg.channel.send(file=discord.File(fp=BytesIO(gif_data), filename=filename))
+                return
             except Exception as e:
-                print(f"GIF processing error for {word}: {e}")
-                await msg.channel.send(gif_url)
+                print(f"Failed to send cached GIF {filename}: {e}")
+                # fall through to re-fetch/process
+
+        # Not cached or failed to send; fetch, process, cache and send
+        try:
+            response = requests.get(gif_url)
+            response.raise_for_status()
+            original_gif = Image.open(BytesIO(response.content))
+            frames = []
+            for frame in ImageSequence.Iterator(original_gif):
+                frame = frame.convert('RGBA')
+                frame = frame.resize((120, 120), resample=Image.Resampling.LANCZOS)
+                frame = frame.convert('P', palette=Image.Palette.ADAPTIVE, dither=Image.Dither.FLOYDSTEINBERG)
+                frames.append(frame)
+            # Write processed GIF to memory buffer
+            buf = BytesIO()
+            frames[0].save(
+                buf,
+                format='GIF',
+                save_all=True,
+                append_images=frames[1:],
+                loop=0,
+                duration=original_gif.info.get('duration', 40),
+                disposal=2,
+                transparency=original_gif.info.get('transparency', 0)
+            )
+            gif_bytes = buf.getvalue()
+            # Cache in DB
+            try:
+                DBHelpers.execute(
+                    "INSERT INTO gif_cache (filename, mime_type, size_bytes, gif_data) VALUES (%s, %s, %s, %s)",
+                    (filename, 'image/gif', len(gif_bytes), gif_bytes)
+                )
+            except Exception as e:
+                print(f"Failed to insert GIF into cache {filename}: {e}")
+            # Send to channel
+            await msg.channel.send(file=discord.File(fp=BytesIO(gif_bytes), filename=filename))
+        except Exception as e:
+            print(f"GIF processing error for {word}: {e}")
+            await msg.channel.send(gif_url)
 
     async def handle_keyword_commands(self, msg):
         """Handle keyword-related commands like $key_words"""

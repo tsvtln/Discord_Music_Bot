@@ -61,3 +61,7 @@ WHERE g.group_name = 'wednesday';
 INSERT INTO keywords (keyword, group_id)
 SELECT 'day1', g.id FROM keyword_groups g WHERE g.group_name = 'd1';
 
+INSERT INTO keywords (keyword, group_id)
+SELECT k, g.id FROM keyword_groups g,
+(SELECT 'цици' k UNION ALL SELECT 'цицки' UNION ALL SELECT 'boobs' UNION ALL SELECT 'cici') x
+WHERE g.group_name = 'booba';

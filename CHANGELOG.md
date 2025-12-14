@@ -122,7 +122,7 @@ This version represents a complete rewrite and modularization of the Discord Mus
 - Updated $cmds command to show all allowed OS commands.
 
 ### Fixed
-- Ensured Wednesday GIF logic only runs if a Wednesday keyword is matched, improving efficiency.
+- Typo in GIF dithering constant (FLOYDSTEINBERГ → FLOYDSTEINBERG) for correct GIF processing.
 - Fixed dynamic keyword listing to avoid duplicates and always reflect current keyword lists.
 
 ## [1.1.1]

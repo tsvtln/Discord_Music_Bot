@@ -1,8 +1,9 @@
-from decouple import config
-
 # ===== BEGIN OS Commands =====
-user = config('SSHUSR')
-server = config('S2')
+# Load SSH user and server from conf/bot.conf via DBHelpers (standalone, no circular deps)
+from bin.db_helpers import DBHelpers
+_conf = DBHelpers.db_conf()
+user = _conf.get('SSHUSR', '')
+server = _conf.get('S2', '')
 
 allowed_commands = {
     'date': 'date',

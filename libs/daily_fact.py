@@ -1,18 +1,25 @@
 import requests
-import os
-from datetime import datetime
 import random
-
-FALLBACK_FACTS = [
-    "A group of flamingos is called a flamboyance.",
-    "Bananas are berries, but strawberries are not.",
-    "Honey never spoils.",
-    "Octopuses have three hearts.",
-    "There are more stars in the universe than grains of sand on Earth."
-]
+from typing import Set, List
 
 API_URL = 'https://uselessfacts.jsph.pl/api/v2/facts/random'
-FACT_DATA_FILE = os.path.join(os.path.dirname(__file__), '../cache/fact_data.txt')
+
+
+def _get_fallback_facts() -> List[str]:
+    from bin.db_helpers import DBHelpers
+    rows = DBHelpers.fetch_all("SELECT fact_text FROM fallback_facts WHERE enabled = TRUE")
+    return [row[0] for row in rows]
+
+
+def _get_today_existing_facts() -> Set[str]:
+    from bin.db_helpers import DBHelpers
+    rows = DBHelpers.fetch_all("SELECT fact_text FROM fact_data WHERE DATE(added_at) = CURDATE()")
+    return {row[0] for row in rows}
+
+
+def _store_fact_today(fact_text: str) -> None:
+    from bin.db_helpers import DBHelpers
+    DBHelpers.execute("INSERT INTO fact_data (fact_text) VALUES (%s)", (fact_text,))
 
 
 def fetch_fact_from_api():
@@ -26,26 +33,22 @@ def fetch_fact_from_api():
     return None
 
 
-def get_today_fact():
-    today = datetime.now().strftime('%Y-%m-%d')
-    existing_facts = set()
-    # collect all facts for today
-    if os.path.exists(FACT_DATA_FILE):
-        with open(FACT_DATA_FILE, 'r') as f:
-            for line in f:
-                if line.startswith(today):
-                    fact = line.strip().split('|', 1)[-1]
-                    existing_facts.add(fact)
-    # try to get a unique fact
+def get_today_fact() -> str:
+    existing_facts = _get_today_existing_facts()
+    fallbacks = _get_fallback_facts() or [
+        "A group of flamingos is called a flamboyance.",
+        "Bananas are berries, but strawberries are not.",
+        "Honey never spoils.",
+        "Octopuses have three hearts.",
+        "There are more stars in the universe than grains of sand on Earth."
+    ]
+
     attempts = 0
-    max_attempts = 50  # Safety counter
-    fact = None
+    max_attempts = 50
     while attempts < max_attempts:
-        fact = fetch_fact_from_api() or random.choice(FALLBACK_FACTS)
-        if fact not in existing_facts:
-            with open(FACT_DATA_FILE, 'a') as f:
-                f.write(f"{today}|{fact}\n")
+        fact = fetch_fact_from_api() or random.choice(fallbacks)
+        if fact and fact not in existing_facts:
+            _store_fact_today(fact)
             return fact
         attempts += 1
-    # if all attempts failed, just return a random fallback fact (not saved)
-    return random.choice(FALLBACK_FACTS)
+    return random.choice(fallbacks)

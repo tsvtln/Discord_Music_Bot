@@ -1,0 +1,21 @@
+# Configuration file for Discord Bot
+
+# User and server for SSH connections
+SSHUSR=''
+S2=''
+
+# Weather API key
+WEATHER_API_KEY=''
+
+# Discord Bot Key/Token
+BOT_KEY=''
+
+# Timeout for GIFs
+timeout=''
+
+# DB connection settings
+DB_PASSWORD=''
+DB_HOST=''
+DB_NAME='discord_bot'
+DB_USER='discord_bot'
+

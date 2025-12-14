@@ -1,56 +1,14 @@
-# --- List of funny not allowed responses ---
-list_of_funny_not_allowed = [
-    'ACCESS DENIED',
-    'FORBIDDEN',
-    'DENIED',
-    'NOT ALLOWED',
-    'NO!',
-    'NO WAY',
-    'You shall not pass',
-    'You are not allowed to do that',
-    'Stop right there',
-    'You are not the boss of me',
-    'You can\'t do that',
-    'Stop it!',
-    'That\'s not how it works',
-    'It starts to hurt',
-    'I WILL NOT ALLOW IT',
-    'Please give up',
-    'Theres no more unique responses, please stop',
-    'I\'m for real, that\'s the last one',
-    'ACCESS DENIED',
-    'ACCESS DENIED',
-    'ACCESS DENIED',
-    'ACCESS DENIED, ACCESS DENIED',
-    'ACCESS DENIED, ACCESS DENIED, ACCESS DENIED',
-    'It will not work, I promise',
-    'You are not allowed to do that',
-    'You are not allowed to do that, I promise',
-    'You command executed successfully, but I lost the out',
-    'SUCCESS',
-    'MORE SUCCESS',
-    'SUCCESS, SUCCESS, SUCCESS',
-    'YOU COMPLETED THE QUEST, CONGRATULATIONS',
-    'YOU ARE THE CHOSEN ONE',
-    'YOU ARE THE ONE',
-    'YOU ARE THE ONE, THE ONLY ONE',
-    'You gained 150 XP',
-    'You lost the XP',
-    'You gained 150 XP, but lost 200',
-    'Thats the end.',
-    'The End',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-]
+# --- List of funny not allowed responses (DB-backed) ---
+
+def _load_funny_responses() -> list[str]:
+    # Local import avoids circular dependencies at module import time
+    from bin.db_helpers import DBHelpers
+    rows = DBHelpers.fetch_all(
+        "SELECT response FROM funny_responses WHERE enabled = TRUE ORDER BY id ASC",
+        ()
+    )
+    return [row[0] for row in rows]
+
+
+list_of_funny_not_allowed = _load_funny_responses()
+

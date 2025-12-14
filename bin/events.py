@@ -44,7 +44,7 @@ class EventHandlers(BotRunner, VARS):
                 channel = self.client.get_channel(c)
                 if channel:
                     await channel.send(f"🧠 Daily Fact: {fact}")
-        scheduler.add_job(post_daily_fact, CronTrigger(hour=16, minute=20))
+        scheduler.add_job(post_daily_fact, CronTrigger(hour=13, minute=11))
         scheduler.start()
 
     def register_events(self):
@@ -64,6 +64,12 @@ class EventHandlers(BotRunner, VARS):
 
     async def on_ready(self):  # verifies that the bot is started and sets a bot status
         print(f"Bot is ready")
+        # Start daily maintenance scheduler
+        try:
+            from bin.maintenance_scheduler import start_scheduler
+            start_scheduler()
+        except Exception as e:
+            print(f"Failed to start maintenance scheduler: {e}")
         self.start_fact_scheduler()
         self.client.loop.create_task(Presence.change_presence_periodically(self))
         await self.client.change_presence(activity=discord.Game(name=random.choice(self.presence_states)))

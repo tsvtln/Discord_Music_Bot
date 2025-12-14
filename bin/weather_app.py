@@ -3,12 +3,16 @@ WeatherApp class to fetch weather data from OpenWeatherMap API.
 """
 
 import requests
-from decouple import config
 
 
 class WeatherApp:
     def __init__(self, city_name):
-        self.API_KEY = config('WEATHER_API_KEY')
+        # Load API key from DB config table
+        from bin.db_helpers import DBHelpers
+        row = DBHelpers.fetch_one("SELECT config_value FROM config WHERE config_key = %s LIMIT 1", ("WEATHER_API_KEY",))
+        if not row or not row[0]:
+            raise RuntimeError("WEATHER_API_KEY not set in database config table")
+        self.API_KEY = row[0]
         self.BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
         self.FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast'
         self.city_name = city_name

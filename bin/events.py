@@ -44,7 +44,7 @@ class EventHandlers(BotRunner, VARS):
                 channel = self.client.get_channel(c)
                 if channel:
                     await channel.send(f"🧠 Daily Fact: {fact}")
-        scheduler.add_job(post_daily_fact, CronTrigger(hour=13, minute=11))
+        scheduler.add_job(post_daily_fact, CronTrigger(hour=16, minute=20))
         scheduler.start()
 
     def register_events(self):

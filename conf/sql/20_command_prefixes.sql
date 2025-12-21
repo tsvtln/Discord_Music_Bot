@@ -9,5 +9,17 @@ CREATE TABLE IF NOT EXISTS command_prefixes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO command_prefixes (command) VALUES
-('$play'),('$cmds'),('$pause'),('$resume'),('$stop'),('$queue'),('$commands'),('$key_words'),('$weather'),('$weather5'),('$kysmetche');
+('$play'),
+('$cmds'),
+('$pause'),
+('$resume'),
+('$stop'),
+('$queue'),
+('$commands'),
+('$key_words'),
+('$weather'),
+('$weather5'),
+('$weather15'),
+('$ChatMode'),
+('$kysmetche');
 

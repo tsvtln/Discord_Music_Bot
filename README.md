@@ -16,58 +16,100 @@
 ### Project Structure
 ```
 Discord_Music_Bot/
-├── run_bot.py                      # Main entry point (uses DB-backed token)
-├── CHANGELOG.md                    # Version history
-├── README.md                       # Documentation
-├── conf/
-│   ├── create_discord_bot_db.sql   # DB and user creation (uses session vars)
-│   ├── run_with_conf.sh            # Runner to inject secrets from conf/bot.conf
-│   ├── run_all.sql                 # Orchestrates modular SQL
-│   └── sql/                        # Modular schema + seed data
-│       ├── 00_setup.sql
-│       ├── 10_config.sql
-│       ├── 20_command_prefixes.sql
-│       ├── 30_funny_responses.sql
-│       ├── 40_gifs.sql
-│       ├── 50_presence_states.sql
-│       ├── 60_responses.sql
-│       ├── 70_fallback_facts.sql
-│       ├── 80_keywords.sql
-│       ├── 90_allowed_commands.sql
-│       ├── 95_list_of_commands.sql
-│       ├── 97_lucky_list.sql
-│       └── 98_misc.sql             # gif_cache, draw_data, fact_data, reroll_data
-├── bin/
-│   ├── main.py                     # Bot runner and lifecycle
-│   ├── events.py                   # Central event handler coordinator
-│   ├── player.py                   # Music playback
-│   ├── presence_changer.py         # Dynamic bot status updates
-│   ├── weather_app.py              # Weather API integration (DB key)
-│   ├── maintenance_scheduler.py    # APScheduler: daily wipes of draw/reroll tables
-│   ├── db_helpers.py               # Standalone DB helpers (no libs.* dependency)
-│   └── on_message/
-│       ├── play_commands.py        # Music commands ($play, $pause, etc.)
-│       ├── handle_shell_cmds.py    # Shell command execution (prefix fix; bot-message guard)
-│       ├── lucky_draw.py           # Daily fortune ($kysmetche) backed by DB draw/reroll tables
-│       ├── weather_cmd.py          # Weather command handler
-│       └── keyword_worker.py       # Keyword-based responses; DB GIF cache
-├── libs/
-│   ├── global_vars.py              # Centralized variable management (DB-backed lists)
-│   ├── key_loaders.py              # Loads BOT_KEY & WEATHER_API_KEY from DB
-│   ├── daily_fact.py               # Fallback facts from DB; facts stored in DB
-│   └── vars/
-│       ├── command_prefixes.py     # Command prefixes
-│       ├── gifs.py                 # GIF lists loaded from DB
-│       ├── presence_states.py      # Presence states from DB
-│       ├── os_commands.py          # SSH user/server from conf/bot.conf
-│       ├── lucky_list.py           # Fortunes from DB
-│       ├── responses.py            # String responses from DB
-│       └── funny_responses.py      # Funny not-allowed responses from DB
-└── cache/
-    └── (no filesystem GIF cache; caching now in DB)
+├── bin
+│   ├── artifical_bot.py
+│   ├── db_helpers.py
+│   ├── events.py
+│   ├── helpers.py
+│   ├── __init__.py
+│   ├── main.py
+│   ├── maintenance_scheduler.py
+│   ├── on_message
+│   │   ├── handle_shell_cmds.py
+│   │   ├── keyword_worker.py
+│   │   ├── lucky_draw.py
+│   │   ├── play_commands.py
+│   │   ├── __pycache__
+│   │   │   ├── handle_shell_cmds.cpython-312.pyc
+│   │   │   ├── keyword_worker.cpython-312.pyc
+│   │   │   ├── lucky_draw.cpython-312.pyc
+│   │   │   ├── play_commands.cpython-312.pyc
+│   │   │   └── weather_cmd.cpython-312.pyc
+│   │   └── weather_cmd.py
+│   ├── player.py
+│   ├── presence_changer.py
+│   ├── __pycache__
+│   │   ├── artifical_bot.cpython-312.pyc
+│   │   ├── db_helpers.cpython-312.pyc
+│   │   ├── events.cpython-312.pyc
+│   │   ├── helpers.cpython-312.pyc
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── main.cpython-312.pyc
+│   │   ├── maintenance_scheduler.cpython-312.pyc
+│   │   ├── player.cpython-312.pyc
+│   │   ├── presence_changer.cpython-312.pyc
+│   │   └── weather_app.cpython-312.pyc
+│   └── weather_app.py
+├── CHANGELOG.md
+├── conf
+│   ├── bot.conf
+│   ├── bot.conf.example
+│   ├── create_discord_bot_db.sql
+│   ├── run_all.sql
+│   ├── run_with_conf.sh
+│   └── sql
+│       ├── 00_setup.sql
+│       ├── 10_config.sql
+│       ├── 20_command_prefixes.sql
+│       ├── 30_funny_responses.sql
+│       ├── 40_gifs.sql
+│       ├── 50_presence_states.sql
+│       ├── 60_responses.sql
+│       ├── 70_fallback_facts.sql
+│       ├── 80_keywords.sql
+│       ├── 90_allowed_commands.sql
+│       ├── 95_list_of_commands.sql
+│       ├── 97_lucky_list.sql
+│       └── 98_misc.sql
+├── libs
+│   ├── daily_fact.py
+│   ├── dap_holder.py
+│   ├── global_vars.py
+│   ├── __init__.py
+│   ├── key_loaders.py
+│   ├── __pycache__
+│   │   ├── daily_fact.cpython-312.pyc
+│   │   ├── dap_holder.cpython-312.pyc
+│   │   ├── global_vars.cpython-312.pyc
+│   │   ├── __init__.cpython-312.pyc
+│   │   └── key_loaders.cpython-312.pyc
+│   └── vars
+│       ├── command_prefixes.py
+│       ├── funny_responses.py
+│       ├── gifs.py
+│       ├── __init__.py
+│       ├── lucky_list.py
+│       ├── os_commands.py
+│       ├── presence_states.py
+│       ├── __pycache__
+│       │   ├── command_prefixes.cpython-312.pyc
+│       │   ├── funny_responses.cpython-312.pyc
+│       │   ├── gifs.cpython-312.pyc
+│       │   ├── __init__.cpython-312.pyc
+│       │   ├── lucky_list.cpython-312.pyc
+│       │   ├── os_commands.cpython-312.pyc
+│       │   ├── presence_states.cpython-312.pyc
+│       │   └── responses.cpython-312.pyc
+│       └── responses.py
+├── LICENSE
+├── README.md
+├── requirements.txt
+└── run_bot.py
 ```
 
 ## Dependencies
+
+The bot requires the following Python packages (see requirements.txt for the full list):
 
 - discord.py
 - yt_dlp
@@ -75,6 +117,33 @@ Discord_Music_Bot/
 - requests
 - APScheduler
 - mysql-connector-python
+- anthropic
+- langchain
+- langchain-anthropic
+- langchain-core
+- langgraph
+- langgraph-checkpoint
+- langgraph-prebuilt
+- langgraph-sdk
+- langsmith
+- python-decouple
+- PyYAML
+- selenium
+- beautifulsoup4
+- pytest
+- ffmpeg
+- aiohttp
+- trio
+- sortedcontainers
+- typing-inspection
+- typing_extensions
+- orjson
+- soupsieve
+- PyNaCl
+- PySocks
+- uuid_utils
+- zstandard
+- ...and more utility packages (see requirements.txt)
 
 Install them using pip:
 
@@ -99,6 +168,9 @@ pip install -r requirements.txt
 - Daily Fortune Draw: $kysmetche with per-user tracking in DB (draw_data, reroll_data)
 - Shell Command Execution: Secure whitelisted commands (allowed_commands_list from DB)
 - Random Daily Fact: Automatic posting of a fact every day (fallback facts from DB)
+- Haralampi keyword responses: AI-powered or database-powered, toggleable at runtime
+- $ChatMode command: Switches Haralampi between AI and DB response modes
+- Custom user data: Store and retrieve arbitrary user data from MySQL
 
 ## Setup and Usage
 
@@ -158,6 +230,9 @@ conf/run_with_conf.sh
 
 If prompted, enter your MySQL root password. The script will set session variables and source `conf/run_all.sql`, creating the schema and populating tables.
 
+_NOTE:_ You will have to manually populate the table. Also, might need to adjust the prompt to your liking in 
+bin/artifical_bot.py. Additionally need to manually populate the list for your discord users in libs/global_vars.py users_for_chat_mode()
+
 ## Configuration
 
 - **DB-backed Variables**: The bot loads configuration and content from MySQL tables:
@@ -196,3 +271,29 @@ If prompted, enter your MySQL root password. The script will set session variabl
 ### Configuration
 - Channel IDs and post time are set in `bin/events.py` in `start_fact_scheduler`
 - Facts are stored in the `fact_data` table
+
+## Haralampi AI/DB Toggle and $ChatMode Command
+
+### Haralampi Chat Modes
+- The bot supports two modes for Haralampi keyword responses:
+  - **AI Mode**: Uses Claude 3 Haiku for intelligent, contextual, and personalized responses (with memory)
+  - **Database Mode**: Uses fast, simple, predefined responses from the database
+- Toggle between modes using the `$ChatMode` command in Discord. The bot will confirm the current mode.
+- Default mode is AI (can be changed at runtime, not persistent across restarts).
+
+### $ChatMode Command
+- Type `$ChatMode` in Discord to switch between AI and database response modes for Haralampi.
+- The bot will reply with the current mode status ("AI Bot (Intelligent)" or "Database (Simple)").
+- When in AI mode, Haralampi uses memory and user-specific behavior. In database mode, responses are instant and simple.
+
+### Custom User Data Table
+- The bot now supports a `custom_user_data` table for storing arbitrary user-specific data.
+- Table schema:
+  ```sql
+  CREATE TABLE custom_user_data (
+      user_key VARCHAR(64) PRIMARY KEY,
+      user_value TEXT NOT NULL
+  );
+  ```
+- Data can be loaded using the `_load_custom_user_data()` method in code.
+

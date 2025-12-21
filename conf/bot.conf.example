@@ -19,3 +19,5 @@ DB_HOST=''
 DB_NAME='discord_bot'
 DB_USER='discord_bot'
 
+# AI API key
+claude_api_key=''

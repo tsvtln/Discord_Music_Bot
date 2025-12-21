@@ -17,6 +17,11 @@ class ShellCommandHandler(VARS):
         # Do not process the bot's own messages
         if msg.author == self.client.user:
             return
+
+        # Skip commands that are handled by other handlers
+        if msg.content.startswith(('$ChatMode', '$key_words')):
+            return
+
         # Ensure command_prefixes is a tuple of strings for startswith
         prefixes = tuple(self.command_prefixes) if isinstance(self.command_prefixes, (list, tuple)) else (self.command_prefixes,)
         if msg.content.startswith('$') and not msg.content.startswith(prefixes):

@@ -11,6 +11,7 @@ import hashlib
 import discord
 from libs.global_vars import VARS
 from bin.helpers import Helpers
+from bin.artifical_bot import ArtificialBot
 
 
 class KeywordWorker(VARS):
@@ -68,21 +69,47 @@ class KeywordWorker(VARS):
         lowered = msg.content.lower()
 
         # First, check for string responses
-        # for word, response in keyword_strings.items():
-        #     if re.search(rf'\b{re.escape(word)}\b', lowered):
-        #         await msg.channel.send(response)
-        #         return True
         for word, category in keyword_strings.items():
             if re.search(rf'\b{re.escape(word)}\b', lowered):
-                # Get current counter value for this category
-                counter = self.response_counters[category]
-                # Get appropriate response array
-                responses = getattr(self, f"{category}_responses")
-                response = responses[counter % len(responses)]
-                # Increment counter for next time
-                self.response_counters[category] = (counter + 1) % len(responses)
-                await msg.channel.send(response)
-                return True
+                # Special handling for haralampi category - check chat_mode
+                if category == 'haralampi':
+                    # If chat_mode is True, use AI bot
+                    if VARS.chat_mode:
+                        try:
+                            # Get username (display name or username)
+                            username = msg.author.display_name or msg.author.name
+                            # Create ArtificialBot instance with username and message content
+                            bot_instance = ArtificialBot(username=username, message_content=msg.content)
+                            # Get the response asynchronously
+                            response_format = await bot_instance.get_response()
+                            response = response_format.punny_response
+                            await msg.channel.send(response)
+                            return True
+                        except Exception as e:
+                            print(f"Error using ArtificialBot for haralampi response: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            # Fallback to a generic message if bot fails
+                            await msg.channel.send("Извинявай, имам малък проблем с отговора... 🤖")
+                            return True
+                    else:
+                        # chat_mode is False, use database responses
+                        counter = self.response_counters[category]
+                        responses = getattr(self, f"{category}_responses")
+                        response = responses[counter % len(responses)]
+                        self.response_counters[category] = (counter + 1) % len(responses)
+                        await msg.channel.send(response)
+                        return True
+                else:
+                    # Get current counter value for this category
+                    counter = self.response_counters[category]
+                    # Get appropriate response array
+                    responses = getattr(self, f"{category}_responses")
+                    response = responses[counter % len(responses)]
+                    # Increment counter for next time
+                    self.response_counters[category] = (counter + 1) % len(responses)
+                    await msg.channel.send(response)
+                    return True
 
         # Only check for wednesday keywords and respond accordingly if matched
         if any(re.search(rf'\b{re.escape(word)}\b', lowered) for word in self.wednesday_keywords):
@@ -171,8 +198,18 @@ class KeywordWorker(VARS):
             await msg.channel.send(gif_url)
 
     async def handle_keyword_commands(self, msg):
-        """Handle keyword-related commands like $key_words"""
+        """Handle keyword-related commands like $key_words and $ChatMode"""
 
+        if msg.content.startswith("$ChatMode"):
+            # Toggle chat_mode
+            VARS.chat_mode = not VARS.chat_mode
+            mode_status = ''
+            if VARS.chat_mode:
+                mode_status = 'Аз мога да гуворя!'
+            else:
+                mode_status = 'Деба'
+            await msg.channel.send(mode_status)
+            return True
 
         if msg.content.startswith("$key_words"):
             # Build keyword list from all sources

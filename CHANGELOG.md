@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## [2.1.0] - 2025-12-21
+### Added
+- **Haralampi AI/DB Toggle**: Haralampi keyword responses can now be switched between AI-powered (Claude 3 Haiku) and database-powered modes at runtime.
+- **$ChatMode Command**: Added `$ChatMode` command to toggle Haralampi between AI and database response modes. The bot replies with the current mode status.
+- **Custom User Data Table**: Added support for a new `custom_user_data` table for storing arbitrary user-specific data. Schema:
+  ```sql
+  CREATE TABLE custom_user_data (
+      user_key VARCHAR(64) PRIMARY KEY,
+      user_value TEXT NOT NULL
+  );
+  ```
+- **Memory and Personalization**: In AI mode, Haralampi uses conversation memory and user-specific behavior for responses.
+
+### Changed
+- Updated README with documentation for $ChatMode, Haralampi chat modes, and custom user data.
+- Keyword worker and global_vars updated to support chat mode toggling and custom user data loading.
+
+### Fixed
+- $ChatMode and $key_words commands now bypass the shell command handler and are processed by the keyword worker as intended.
+
 ## [2.0.3] - 2025-12-13
 ### Added
 - **Random Daily Fact Feature**: The bot now posts a random real-world fact every day at a scheduled time to one or more channels.

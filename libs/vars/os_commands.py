@@ -11,7 +11,7 @@ allowed_commands = {
     'cpu_ms': 'ps -eo pid,comm,%cpu --sort=-%cpu | head -n 6',
     'mem_ms': 'ps -eo pid,comm,%mem --sort=-%mem | head -n 6',
     'disk_ms': 'df -h',
-    'jelly': f"ssh {user}@{server} 'systemctl status jellyfin.service |head -5'",
+    'jelly': f"ssh {user}@{server} 'systemctl status pihole-FTL.service |head -5'",
     'tailscale_s1': "systemctl status tailscaled.service |head -5",
     'tailscale_s2': f"ssh {user}@{server} 'systemctl status tailscaled.service |head -5'",
     'zabbix_s1': "systemctl status zabbix-server.service |head -5&&"

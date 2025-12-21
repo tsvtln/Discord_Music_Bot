@@ -31,3 +31,17 @@ CREATE TABLE IF NOT EXISTS reroll_data (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS model_memory (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user VARCHAR(255) NOT NULL,
+    message LONGTEXT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE custom_user_data (
+    user_key VARCHAR(64) PRIMARY KEY,
+    user_value TEXT NOT NULL
+);

@@ -15,4 +15,5 @@ INSERT INTO config (config_key, config_value, description) VALUES
 ('S2', COALESCE(@S2, ''), 'SSH target server'),
 ('WEATHER_API_KEY', COALESCE(@WEATHER_API_KEY, ''), 'Weather API key'),
 ('BOT_KEY', COALESCE(@BOT_KEY, ''), 'Discord bot token'),
-('timeout', COALESCE(@timeout, ''), 'GIF timeout in seconds');
+('timeout', COALESCE(@timeout, ''), 'GIF timeout in seconds'),
+('claude_api_key', COALESCE(@claude_api_key, ''), 'Claude Sonnet API key');

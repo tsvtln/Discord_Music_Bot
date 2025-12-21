@@ -15,6 +15,20 @@ class VARS:
     response_num = 0
     last_message_delta = 0
     last_message_date = 0
+    chat_mode = False  # True = AI bot mode, False = database response mode
+
+    @staticmethod
+    def users_for_chat_mode() -> list[str]:
+        return [
+            'potkor',
+            'dev40',
+            'trogdor3000',
+            'delay4106',
+            'grimy',
+            'джиБъс! - магесник',
+            'whoknows (BG)',
+            'whoknowsss'
+        ]
 
     # Load timeout from DB config (fallback to 3000 if not set)
     @staticmethod
@@ -96,3 +110,19 @@ class VARS:
 
     # --- List of commands for the bot (DB-backed) ---
     list_of_commands = _load_list_of_commands()
+
+    @staticmethod
+    def _load_custom_user_data():
+        try:
+            from bin.db_helpers import DBHelpers
+            rows = DBHelpers.fetch_all(
+                "SELECT user_key, user_value FROM custom_user_data",
+                ()
+            )
+            return {user: data for (user, data) in rows}
+        except Exception:
+            return {}
+
+    # --- Custom user data (DB-backed) ---
+    custom_user_data = _load_custom_user_data()
+

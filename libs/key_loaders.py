@@ -26,3 +26,7 @@ class KeyLoader:
         api_key = KeyLoader._get_config_value('WEATHER_API_KEY')
         base_url = 'https://api.openweathermap.org/data/2.5/weather'
         return api_key, base_url
+
+    @staticmethod
+    def ai_api_key() -> str:
+        return KeyLoader._get_config_value('claude_api_key')

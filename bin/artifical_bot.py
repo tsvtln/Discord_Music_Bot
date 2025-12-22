@@ -21,17 +21,17 @@ class ResponseFormat:
 @dataclass
 class Context:
     """Custom runtime context schema."""
-    user_id: str
+    username: str
 
 
 @tool
 def get_user_behavior(runtime: ToolRuntime[Context]) -> str:
     """Retrieve user information based on user ID."""
-    user_id = runtime.context.user_id
-    user_id = user_id.lower()
+    username = runtime.context.username
+    username = username.lower()
     configured_users = VARS.users_for_chat_mode()
-    if user_id in configured_users:
-        return VARS.custom_user_data[user_id]
+    if username in configured_users:
+        return VARS.custom_user_data[username]
     else:
         return "No special information available."
 
@@ -45,7 +45,7 @@ class ArtificialBot:
         self.has_history = len(self.history_collector) > 0
         self.message_content = message_content
         self.username = username
-        self.context = Context(user_id=username)
+        self.context = Context(username=username)
         self.user_behavior_info = self.get_user_behavior_info(self.username)
         self.system_prompt = self.build_system_prompt(self.username, self.has_history)
         self.invoke_config = {"configurable": {"thread_id": "1"}}
@@ -82,16 +82,16 @@ class ArtificialBot:
             cursor.close()
             return rows
 
-    def get_user_behavior_info(self, user_id: str) -> str:
+    def get_user_behavior_info(self, username: str) -> str:
         configured_users = VARS.users_for_chat_mode()
-        user_id = user_id.lower()
-        if user_id in configured_users:
-            return VARS.custom_user_data[user_id]
+        username = username.lower()
+        if username in configured_users:
+            return VARS.custom_user_data[username]
         else:
             return "No special information available."
 
-    def build_system_prompt(self, user_id: str, has_history: bool) -> str:
-        user_info = self.get_user_behavior_info(user_id) if user_id != 'None' else "No special information."
+    def build_system_prompt(self, username: str, has_history: bool) -> str:
+        user_info = self.get_user_behavior_info(username)
         anti_greeting = ("If there is already conversation history, "
                          "DO NOT greet the user again. "
                          "Only greet on the very first message of a new conversation.") if has_history else ""
@@ -113,9 +113,9 @@ class ArtificialBot:
 
         USER INFO: {user_info}
         {anti_greeting}
-        IMPORTANT: When addressing the user, ALWAYS use their user_id, exactly as provided, in Latin characters, 
-        surrounded by backticks (for example, `potkor`). Never use a real name, nickname, or title. 
-        Never guess or invent a real name for the user. Only use the user_id.
+        IMPORTANT: When addressing the user, ALWAYS use their username, exactly as provided, in Latin characters, 
+        surrounded by backticks (for example, `Kiber`). Never use a real name, nickname, or title. 
+        Never guess or invent a real name for the user. Only use the username.
 
         Sometimes you will remember a fake embarrassing story with one of those people without asking if 
         you should share it, because you are a gangster from 'Ляолин' and straight up share it: 
@@ -135,24 +135,24 @@ class ArtificialBot:
         'Юслеса' is a man. He loves to eat shit and
         generally is a super extreme useless person that everyone hates.
 
-        The user_id is always provided in Latin characters and is always surrounded by backticks (e.g., `potkor`). 
-        NEVER translate, transliterate, or change the user_id in any way. 
+        The username is always provided in Latin characters and is always surrounded by backticks (e.g., `Kiber`). 
+        NEVER translate, transliterate, or change the username in any way. 
         Always use it exactly as given, in Latin characters, even when writing in Bulgarian. 
-        For example, if the user_id is `kiber`, always write `kiber` (not `кибер`). 
+        For example, if the username is `kiber`, always write `kiber` (not `кибер`). 
         If you do not follow this instruction, you are making a mistake.
 
         Negative example (incorrect): Здрасти, кибер!
         Positive example (correct): Здрасти, `kiber`!
 
         Always respond in Bulgarian.
-        The current user_id is: `{user_id}`
+        The current username is: `{username}`
 
-        Repeat: Never translate, transliterate, or change the user_id `{user_id}`. 
+        Repeat: Never translate, transliterate, or change the username `{username}`. 
         Always use it exactly as given, in Latin characters and surrounded by backticks. 
         Never use a real name, nickname, or title for the user unless specified in the USER INFO.
         
         Remember: Keep it SHORT - 4-5 sentences maximum up to 500 characters!
-        Reminder: Your next response must be no more than 5 sentences and 500 characters. Stop immediately after that.
+        Reminder: Your next response must be no more than 5 sentences and 500 characters.
         """
 
     async def speak(self, msg: str) -> ResponseFormat:

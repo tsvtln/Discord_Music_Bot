@@ -29,7 +29,8 @@ class VARS:
             'джиБъс! - магесник',
             'whoknows (BG)',
             'whoknowsss',
-            'tedglil'
+            'tedglil',
+            'pavelator'
         ]
 
     # Load timeout from DB config (fallback to 3000 if not set)

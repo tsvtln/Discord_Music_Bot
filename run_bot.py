@@ -14,7 +14,7 @@ from libs.key_loaders import KeyLoader
 import sys
 
 # Create bot instance
-debug = True
+debug = False
 bot = BotRunner(debug)
 client = bot.client
 

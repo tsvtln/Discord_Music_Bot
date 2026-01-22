@@ -16,6 +16,7 @@ class VARS:
     last_message_delta = 0
     last_message_date = 0
     chat_mode = False  # True = AI bot mode, False = database response mode
+    debug_mode = False
 
     @staticmethod
     def users_for_chat_mode() -> list[str]:
@@ -28,7 +29,8 @@ class VARS:
             'джиБъс! - магесник',
             'whoknows (BG)',
             'whoknowsss',
-            'tedglil'
+            'tedglil',
+            'pavelator'
         ]
 
     # Load timeout from DB config (fallback to 3000 if not set)

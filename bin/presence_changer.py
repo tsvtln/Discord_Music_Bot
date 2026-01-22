@@ -6,15 +6,14 @@ It uses the `discord.py` library to set a random status from a predefined list e
 import discord
 import asyncio
 import random
-from .main import BotRunner
+from libs.global_vars import VARS
 
 
-class Presence(BotRunner):
+class Presence:
     def __init__(self, client):
-        super().__init__()
         self.client = client
 
     async def change_presence_periodically(self):
         while True:
-            await self.client.change_presence(activity=discord.Game(name=random.choice(self.presence_states)))
+            await self.client.change_presence(activity=discord.Game(name=random.choice(VARS.presence_states)))
             await asyncio.sleep(1800)  # 30 minutes

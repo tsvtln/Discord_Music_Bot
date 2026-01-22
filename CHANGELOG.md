@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [2.1.1] - 2025-12-23
+### Fixed 
+- Resolved an issue where the Haralampi AI mode was not properly utilizing conversation memory and user-specific behavior, leading to generic responses. Now, in AI mode, Haralampi provides more personalized and context-aware replies based on prior interactions and stored user data.
+- Fixed the bot mentioning the username only of the first user who initiated a chat session since it's first bootup. Now, Haralampi correctly identifies and mentions the username of the user currently interacting with it in AI mode.
+- Corrected the database query logic to ensure that user-specific data is accurately retrieved and stored in the `custom_user_data` table, preventing any potential data mix-ups between different users.
+- Fixed the bot responses strafing into hiper long messages in AI mode. Now, responses are concise and relevant.
+
 ## [2.1.0] - 2025-12-21
 ### Added
 - **Haralampi AI/DB Toggle**: Haralampi keyword responses can now be switched between AI-powered (Claude 3 Haiku) and database-powered modes at runtime.

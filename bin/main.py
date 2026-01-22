@@ -14,7 +14,7 @@ from libs.global_vars import VARS
 
 
 class BotRunner(VARS):
-    def __init__(self):
+    def __init__(self, debug: bool):
         super().__init__()
         self.key = KeyLoader.bot_key()
         self.yt_dl_opts = DAP.dlp_options()
@@ -28,3 +28,4 @@ class BotRunner(VARS):
         self.bot_chat = None
         self.client = discord.Client(command_prefix='$', intents=discord.Intents.all())
         self.files_to_clean = []
+        VARS.debug_mode = debug

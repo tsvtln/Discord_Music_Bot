@@ -14,7 +14,8 @@ from libs.key_loaders import KeyLoader
 import sys
 
 # Create bot instance
-bot = BotRunner()
+debug = True
+bot = BotRunner(debug)
 client = bot.client
 
 # Register event handlers

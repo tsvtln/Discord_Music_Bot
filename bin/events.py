@@ -1,7 +1,6 @@
 """
 Event handlers for the Discord Music Bot
 """
-from .main import BotRunner
 from .player import Player
 from .presence_changer import Presence
 from .on_message.play_commands import PlayCommands
@@ -17,9 +16,8 @@ from libs.global_vars import VARS
 import discord
 
 
-class EventHandlers(BotRunner, VARS):
+class EventHandlers:
     def __init__(self, bot):
-        super().__init__()
         self.bot = bot
         self.client = bot.client
         self.play_commands = PlayCommands(bot, bot.client)
@@ -72,7 +70,7 @@ class EventHandlers(BotRunner, VARS):
             print(f"Failed to start maintenance scheduler: {e}")
         self.start_fact_scheduler()
         self.client.loop.create_task(Presence.change_presence_periodically(self))
-        await self.client.change_presence(activity=discord.Game(name=random.choice(self.presence_states)))
+        await self.client.change_presence(activity=discord.Game(name=random.choice(VARS.presence_states)))
 
     async def on_message(self, msg):
         """Main message handler for all bot functionality"""
@@ -115,9 +113,9 @@ class EventHandlers(BotRunner, VARS):
 
         # Other Commands
         if msg.content.startswith("$cmds"):
-            await msg.channel.send(f"List of available commands:\n{'\n'.join(self.allowed_commands_list)}")
+            await msg.channel.send(f"List of available commands:\n{'\n'.join(VARS.allowed_commands_list)}")
 
         # Output the list of commands
         if msg.content.startswith("$commands"):
-            tp = '\n'.join(self.list_of_commands)
+            tp = '\n'.join(VARS.list_of_commands)
             await msg.channel.send(f"Куманди:\n{tp}")

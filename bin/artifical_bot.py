@@ -1,4 +1,3 @@
-# from libs.global_vars import VARS
 from libs.key_loaders import KeyLoader
 
 from dataclasses import dataclass
@@ -24,31 +23,21 @@ class Context:
     username: str
 
 
-@tool
-def get_user_behavior(runtime: ToolRuntime[Context]) -> str:
-    """Retrieve user information based on user ID."""
-    username = runtime.context.username
-    username = username.lower()
-    configured_users = VARS.users_for_chat_mode()
-    if username in configured_users:
-        return VARS.custom_user_data[username]
-    else:
-        return "No special information available."
-
-
 class ArtificialBot:
     def __init__(self, username: str, message_content):
         self.api_key = KeyLoader.ai_api_key()
         self.response = None
-        self.connect_db = self.MySQLMemory()
-        self.history_collector = self.connect_db.get_history()
+        self.username = username
+        # Use username-specific thread_id for isolated conversations per user
+        self.connect_db = self.MySQLMemory(thread_id=self.username)
+        # Filter history by current username only
+        self.history_collector = self.connect_db.get_history(thread_id=self.username)
         self.has_history = len(self.history_collector) > 0
         self.message_content = message_content
-        self.username = username
         self.context = Context(username=username)
         self.user_behavior_info = self.get_user_behavior_info(self.username)
         self.system_prompt = self.build_system_prompt(self.username, self.has_history)
-        self.invoke_config = {"configurable": {"thread_id": "1"}}
+        self.invoke_config = {"configurable": {"thread_id": self.username}}
         self.model = init_chat_model(
             model="claude-3-haiku-20240307",
             # https://www.helicone.ai/llm-cost/provider/anthropic/model/claude-3-haiku-20240307
@@ -65,19 +54,30 @@ class ArtificialBot:
         return self.response
 
     class MySQLMemory:
-        def __init__(self, table="model_memory"):
+        def __init__(self, table="model_memory", thread_id=None):
             self.conn = DBHelpers.get_conn()
             self.table = table
+            self.thread_id = thread_id
 
         def add(self, user, message):
             cursor = self.conn.cursor()
-            cursor.execute(f"INSERT INTO {self.table} (user, message) VALUES (%s, %s)", (user, message))
+            cursor.execute(
+                f"INSERT INTO {self.table} (thread_id, user, message) VALUES (%s, %s, %s)",
+                (self.thread_id, user, message)
+            )
             self.conn.commit()
             cursor.close()
 
-        def get_history(self):
+        def get_history(self, thread_id=None):
             cursor = self.conn.cursor(dictionary=True)
-            cursor.execute(f"SELECT user, message FROM {self.table} ORDER BY id ASC")
+            if thread_id:
+                # Filter by thread_id to get only this user's conversation
+                cursor.execute(
+                    f"SELECT user, message FROM {self.table} WHERE thread_id = %s ORDER BY id ASC",
+                    (thread_id,)
+                )
+            else:
+                cursor.execute(f"SELECT user, message FROM {self.table} ORDER BY id ASC")
             rows = cursor.fetchall()
             cursor.close()
             return rows

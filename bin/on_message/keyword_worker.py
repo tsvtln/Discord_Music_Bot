@@ -78,11 +78,23 @@ class KeywordWorker(VARS):
                         try:
                             # Get username (display name or username)
                             username = msg.author.display_name or msg.author.name
+
+                            # debug print
+                            print(f"Using ArtificialBot for haralampi response to user: {username}")
+
                             # Create ArtificialBot instance with username and message content
                             bot_instance = ArtificialBot(username=username, message_content=msg.content)
                             # Get the response asynchronously
                             response_format = await bot_instance.get_response()
+
+                            # debug response_format
+                            print(f"ArtificialBot response format: {response_format}")
+
                             response = response_format.punny_response
+
+                            # debug response from AI
+                            print(f"ArtificialBot response: {response}")
+
                             await msg.channel.send(response)
                             return True
                         except Exception as e:
@@ -90,7 +102,7 @@ class KeywordWorker(VARS):
                             import traceback
                             traceback.print_exc()
                             # Fallback to a generic message if bot fails
-                            await msg.channel.send("Извинявай, имам малък проблем с отговора... 🤖")
+                            await msg.channel.send("В момента съм се наакал... 🤖")
                             return True
                     else:
                         # chat_mode is False, use database responses

@@ -16,6 +16,7 @@ class VARS:
     last_message_delta = 0
     last_message_date = 0
     chat_mode = False  # True = AI bot mode, False = database response mode
+    debug_mode = False
 
     @staticmethod
     def users_for_chat_mode() -> list[str]:

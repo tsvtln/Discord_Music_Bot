@@ -15,7 +15,7 @@ class VARS:
     response_num = 0
     last_message_delta = 0
     last_message_date = 0
-    chat_mode = False  # True = AI bot mode, False = database response mode
+    chat_mode = True  # True = AI bot mode, False = database response mode
     debug_mode = False
 
     @staticmethod

@@ -21,3 +21,4 @@ DB_USER='discord_bot'
 
 # AI API key
 claude_api_key=''
+semaphore_api_key=''

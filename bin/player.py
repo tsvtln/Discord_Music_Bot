@@ -15,8 +15,8 @@ from libs.global_vars import VARS
 
 
 class Player(BotRunner, VARS):
-    def __init__(self, guild_id, msg, bot_instance=None):
-        super().__init__()
+    def __init__(self, guild_id, msg, bot_instance=None, debug=False):
+        super().__init__(debug=debug)
         self.guild_id = guild_id
         self.msg = msg
         self.bot_instance = bot_instance or self

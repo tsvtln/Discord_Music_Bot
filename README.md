@@ -1,11 +1,12 @@
-## Discord Bot v2.1.0
+## Discord Bot v2.2.0
 
 > This Python Discord music bot features a modular architecture designed for scalability and maintainability.
 > It utilizes discord.py for Discord interactions, asyncio for asynchronous programming, yt_dlp for YouTube, and MySQL for configuration/state.
 
 ## Architecture
 
-**Version 2.1.0** introduces database-backed configuration and caching, plus daily maintenance:
+**Version 2.2.0** introduces Ansible job status monitoring and reporting:
+- **Ansible Job Status Scheduler**: Automated monitoring and posting of Ansible job execution results from Semaphore
 - **DB-backed Config & Data**: Keys, commands, keywords, responses, presence states, fortunes, GIFs are loaded from MySQL tables
 - **DB GIF Cache**: Resized GIFs are cached in the `gif_cache` DB table instead of the filesystem
 - **Daily Maintenance**: APScheduler wipes `draw_data` and `reroll_data` daily at 00:00
@@ -171,6 +172,7 @@ pip install -r requirements.txt
 - Haralampi keyword responses: AI-powered or database-powered, toggleable at runtime
 - $ChatMode command: Switches Haralampi between AI and DB response modes
 - Custom user data: Store and retrieve arbitrary user data from MySQL
+- **Ansible Job Status Monitoring**: Automated monitoring and posting of Ansible job execution results from Semaphore server
 
 ## Setup and Usage
 
@@ -296,4 +298,59 @@ bin/artifical_bot.py. Additionally need to manually populate the list for your d
   );
   ```
 - Data can be loaded using the `_load_custom_user_data()` method in code.
+
+## Ansible Job Status Monitoring
+
+### Overview
+- The bot automatically monitors and reports Ansible job execution status from a Semaphore server
+- Runs on a scheduled basis (default: daily at 18:31) and posts results to a configured Discord channel
+- Fetches job data via Semaphore REST API using Bearer token authentication
+- Parses job output to extract meaningful information like template names, execution status, and package upgrade summaries
+
+### How it works
+1. At the scheduled time, the bot retrieves the next job ID from the `job_id_tracker` table in MySQL
+2. Fetches the job's raw output and status from Semaphore API endpoints:
+   - `/api/project/1/tasks/{job_id}/raw_output` - Full job output
+   - `/api/project/1/tasks/{job_id}` - Job status summary
+3. Parses the output to extract:
+   - Template name and execution status
+   - Package upgrade summaries
+   - Job summary output
+4. Posts formatted results to the configured Discord channel
+5. Increments the job ID tracker in the database for the next run
+6. Continues checking jobs until an invalid/missing job is encountered
+
+### Configuration
+- **Channel ID**: Set in `bin/events.py` in the `send_ansible_job_status` method (default: `1474763280970027070`)
+- **Schedule**: Configured using CronTrigger in the same method (default: `hour=18, minute=31`)
+- **API Key**: Stored in the `config` table with key `semaphore_api_key`
+- **Job Tracker**: Uses the `job_id_tracker` table to maintain the current job ID
+
+### Database Requirements
+- `job_id_tracker` table with a single `job_id` integer field
+- `config` table entry with `config_key='semaphore_api_key'` containing your Semaphore API Bearer token
+
+### Example Output
+```
+Ansible Playbook: System Updates - success
+============================================
+Updated packages:
+  - package1: 1.0.0 -> 1.0.1
+  - package2: 2.3.4 -> 2.3.5
+```
+
+### SQL Setup
+```sql
+-- Create job_id_tracker table
+CREATE TABLE IF NOT EXISTS job_id_tracker (
+    job_id INT
+);
+
+-- Insert initial job ID
+INSERT INTO job_id_tracker (job_id) VALUES (1);
+
+-- Add Semaphore API key to config table
+INSERT INTO config (config_key, config_value) 
+VALUES ('semaphore_api_key', 'YOUR_SEMAPHORE_BEARER_TOKEN');
+```
 

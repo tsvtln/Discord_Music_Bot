@@ -43,7 +43,11 @@ CREATE TABLE IF NOT EXISTS model_memory (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE custom_user_data (
+CREATE TABLE IF NOT EXISTS custom_user_data (
     user_key VARCHAR(64) PRIMARY KEY,
     user_value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS job_id_tracker (
+    job_id INT
 );

@@ -9,6 +9,15 @@
     - Automatically increments the job ID tracker in the database after each successful post.
     - Integrated with MySQL `job_id_tracker` table and `config` table for API key storage.
     - Feature is implemented using APScheduler with CronTrigger and runs autonomously.
+
+### Fixed
+- **Voice Client Errors**: Fixed multiple issues with voice state handling.
+    - Fixed `ClientException: Not connected to voice` when bot tries to play after disconnecting.
+    - Added connection checks before attempting to play next song.
+    - Added safety checks for queue access to prevent `IndexError`.
+    - Improved error handling with graceful cleanup of queues and voice clients.
+    - Fixed `BotRunner.__init__() missing debug argument` error in Player class.
+
 ### Changed
 - `$ChatMode` will now begin as enabled
 

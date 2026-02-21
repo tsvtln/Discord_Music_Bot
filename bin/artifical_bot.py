@@ -35,7 +35,8 @@ class ArtificialBot:
         self.user_behavior_info = self.get_user_behavior_info(self.username)
         self.invoke_config = {"configurable": {"thread_id": self.username}}
         self.model = init_chat_model(
-            model="claude-3-5-haiku-20241022",  # $0.0008
+            model="claude-haiku-4-5-20251001",  # $0.005
+            # model="claude-3-5-haiku-20241022",  # $0.0008
             # model="claude-3-haiku-20240307",  # $0.00025
             # https://www.helicone.ai/llm-cost/provider/anthropic/model/claude-3-haiku-20240307
             temperature=random.uniform(0.5, 1),

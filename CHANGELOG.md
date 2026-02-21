@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [2.2.0] - 2026-02-21
+### Added
+- **Ansible Job Status Scheduler**: The bot now automatically checks and posts Ansible job execution status from a Semaphore server at scheduled times.
+    - Fetches job output and status from Semaphore REST API using Bearer token authentication stored in the database.
+    - Parses and extracts relevant job information including template name, execution status, and package upgrade summaries.
+    - Posts formatted job results to a configured Discord channel daily at 18:31.
+    - Automatically increments the job ID tracker in the database after each successful post.
+    - Integrated with MySQL `job_id_tracker` table and `config` table for API key storage.
+    - Feature is implemented using APScheduler with CronTrigger and runs autonomously.
+### Changed
+- `$ChatMode` will now begin as enabled
+
 ## [2.1.1] - 2025-12-23
 ### Fixed 
 - Resolved an issue where the Haralampi AI mode was not properly utilizing conversation memory and user-specific behavior, leading to generic responses. Now, in AI mode, Haralampi provides more personalized and context-aware replies based on prior interactions and stored user data.

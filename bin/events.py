@@ -1,6 +1,7 @@
 """
 Event handlers for the Discord Music Bot
 """
+import bin.db_helpers
 from .player import Player
 from .presence_changer import Presence
 from .on_message.play_commands import PlayCommands
@@ -14,6 +15,7 @@ from libs.daily_fact import get_today_fact
 import random
 from libs.global_vars import VARS
 import discord
+import requests
 
 
 class EventHandlers:
@@ -26,6 +28,7 @@ class EventHandlers:
         self.weather_handler = WeatherCommandHandler(bot.client)
         self.keyword_worker = KeywordWorker(bot.client)
         self.scheduler_started = False  # Prevent multiple schedulers
+        self.ansible_job_status = False  # Track if Ansible job status scheduler is running
         self.register_events()
 
     def start_fact_scheduler(self):
@@ -42,7 +45,83 @@ class EventHandlers:
                 channel = self.client.get_channel(c)
                 if channel:
                     await channel.send(f"🧠 Daily Fact: {fact}")
-        scheduler.add_job(post_daily_fact, CronTrigger(hour=16, minute=20))
+        scheduler.add_job(post_daily_fact, CronTrigger(minute=0))
+        scheduler.start()
+
+    def send_ansible_job_status(self):
+        if getattr(self, '_ansible_scheduler_started', False):
+            return
+        self._ansible_scheduler_started = True
+        scheduler = AsyncIOScheduler()
+        CHANNEL_ID = 1474763280970027070
+
+        async def check_and_post_ansible_job():
+            print('started')
+            channel = self.client.get_channel(CHANNEL_ID)
+            if not channel:
+                print(f"Error: Channel {CHANNEL_ID} not found")
+                return
+            FINISH = False
+            db_connector = bin.db_helpers.DBHelpers.get_conn()
+            current_job_query = 'select job_id from job_id_tracker;'
+            next_job = 'UPDATE job_id_tracker SET job_id = job_id + 1;'
+            api_key = "select config_value from config where config_key='semaphore_api_key';"
+
+            with db_connector.cursor() as cursor:
+                cursor.execute(api_key)
+                authorization_token = cursor.fetchone()[0]
+
+            headers = {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": f"Bearer {authorization_token}"
+            }
+
+            while not FINISH:
+                next_job_to_be_checked = 0
+                job_output_build = []
+                with db_connector.cursor() as cursor:
+                    cursor.execute(current_job_query)
+                    next_job_to_be_checked = int(cursor.fetchone()[0])
+
+                url_raw_output = f"http://raspberrypi.local:3000/api/project/1/tasks/{next_job_to_be_checked}/raw_output"
+                url_status = f"http://raspberrypi.local:3000/api/project/1/tasks/{next_job_to_be_checked}"
+                try:
+                    response = requests.get(url_raw_output, headers=headers)
+                    job_status_summary = requests.get(url_status, headers=headers)
+                except Exception as e:
+                    print(e)
+                    FINISH = True
+                    continue
+                if response.status_code != 200:
+                    FINISH = True
+                    continue
+                else:
+                    job_output = response.text.split('\n')
+                    for index, item in enumerate(job_output):
+                        if 'Run TaskRunner with template:' in item:
+                            job_output_build.append((item.replace('Run TaskRunner with template: ', '')) + ' - ' +
+                                                    job_status_summary.json()['status'])
+                        elif 'Display upgraded packages summary' in item or 'Job Summary Output' in item:
+                            if 'skipping' not in job_output[index + 1]:
+                                index_start = index + 3
+                                FINISH_OUTPUT = False
+                                while not FINISH_OUTPUT:
+                                    if 'TASK' in job_output[index_start] or 'PLAY RECAP' in job_output[index_start]:
+                                        FINISH_OUTPUT = True
+                                        continue
+                                    job_output_build.append(job_output[index_start])
+                                    index_start += 1
+                    message = '\n'.join(job_output_build)
+                    await channel.send(message)
+
+                    with db_connector.cursor() as cursor:
+                        cursor.execute(next_job)
+                        db_connector.commit()
+
+            db_connector.close()
+
+        scheduler.add_job(check_and_post_ansible_job, CronTrigger(hour=18, minute=31))
         scheduler.start()
 
     def register_events(self):
@@ -69,6 +148,7 @@ class EventHandlers:
         except Exception as e:
             print(f"Failed to start maintenance scheduler: {e}")
         self.start_fact_scheduler()
+        self.send_ansible_job_status()
         self.client.loop.create_task(Presence.change_presence_periodically(self))
         await self.client.change_presence(activity=discord.Game(name=random.choice(VARS.presence_states)))
 

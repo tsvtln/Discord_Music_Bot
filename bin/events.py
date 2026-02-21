@@ -133,8 +133,11 @@ class EventHandlers:
     async def on_voice_state_update(self, member, before, after):
         """Handle voice state updates - continue playing when users leave"""
         guild_id = member.guild.id
+        # Check if bot is in voice and connected before trying to play
         if after.channel is None and self.bot.voice_clients.get(guild_id) is not None:
-            if not self.bot.voice_clients[guild_id].is_playing() and self.bot.song_queues.get(guild_id):
+            voice_client = self.bot.voice_clients[guild_id]
+            # Only continue if bot is connected and not playing but has songs queued
+            if voice_client.is_connected() and not voice_client.is_playing() and self.bot.song_queues.get(guild_id):
                 # Create a Player instance to handle the next song
                 player = Player(guild_id, None, self.bot)
                 await player.play_next_song()

@@ -45,11 +45,26 @@ class Player(BotRunner, VARS):
             client = self.client
 
         if self.guild_id in song_queues and song_queues[self.guild_id]:
+            # Check if bot is still connected to voice
+            if self.guild_id not in voice_clients or not voice_clients[self.guild_id].is_connected():
+                print(f"Bot not connected to voice in guild {self.guild_id}, clearing queue")
+                # Clear the queue since bot is disconnected
+                if self.guild_id in song_queues:
+                    song_queues[self.guild_id].clear()
+                return
+
             # Get the song data (url, video_name, audio_url) from queue
-            next_song_data = song_queues[self.guild_id][0]
-            self.next_url = next_song_data[0]  # URL
-            self.video_name = next_song_data[1]  # Video name
-            audio_url = next_song_data[2]  # Audio URL
+            try:
+                next_song_data = song_queues[self.guild_id][0]
+                self.next_url = next_song_data[0]  # URL
+                self.video_name = next_song_data[1]  # Video name
+                audio_url = next_song_data[2]  # Audio URL
+            except (IndexError, KeyError) as e:
+                print(f"Error accessing queue data in guild {self.guild_id}: {e}")
+                # Clear the problematic queue
+                if self.guild_id in song_queues:
+                    song_queues[self.guild_id].clear()
+                return
 
             # Check for special songs and send appropriate GIFs
             if 'MEGALOVANIA' in self.video_name:
@@ -77,10 +92,21 @@ class Player(BotRunner, VARS):
 
             # Play the audio with callback for next song
             # Ignore the false warning on the run_coroutine_threadsafe
-            voice_clients[self.guild_id].play(self.next_audio,
-                                               after=lambda e: asyncio.run_coroutine_threadsafe(
-                                                   self.play_next_song(),
-                                                   client.loop))
-
-            # Update bot presence
-            await client.change_presence(activity=discord.Game(name=self.video_name))
+            try:
+                voice_clients[self.guild_id].play(self.next_audio,
+                                                   after=lambda e: asyncio.run_coroutine_threadsafe(
+                                                       self.play_next_song(),
+                                                       client.loop))
+                # Update bot presence
+                await client.change_presence(activity=discord.Game(name=self.video_name))
+            except discord.errors.ClientException as e:
+                print(f"Error playing audio in guild {self.guild_id}: {e}")
+                # Clear queue and clean up
+                if self.guild_id in song_queues:
+                    song_queues[self.guild_id].clear()
+                if self.guild_id in voice_clients:
+                    try:
+                        await voice_clients[self.guild_id].disconnect()
+                    except:
+                        pass
+                    del voice_clients[self.guild_id]

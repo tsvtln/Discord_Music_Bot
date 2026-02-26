@@ -303,7 +303,7 @@ bin/artifical_bot.py. Additionally need to manually populate the list for your d
 
 ### Overview
 - The bot automatically monitors and reports Ansible job execution status from a Semaphore server
-- Runs on a scheduled basis (default: daily at 18:31) and posts results to a configured Discord channel
+- Runs on a scheduled basis (default: once every hour) and posts results to a configured Discord channel
 - Fetches job data via Semaphore REST API using Bearer token authentication
 - Parses job output to extract meaningful information like template names, execution status, and package upgrade summaries
 
@@ -321,8 +321,8 @@ bin/artifical_bot.py. Additionally need to manually populate the list for your d
 6. Continues checking jobs until an invalid/missing job is encountered
 
 ### Configuration
-- **Channel ID**: Set in `bin/events.py` in the `send_ansible_job_status` method (default: `1474763280970027070`)
-- **Schedule**: Configured using CronTrigger in the same method (default: `hour=18, minute=31`)
+- **Channel ID**: Set in `bin/events.py` in the `send_ansible_job_status` method
+- **Schedule**: Configured using CronTrigger in the same method (default: every hours `minute=0`)
 - **API Key**: Stored in the `config` table with key `semaphore_api_key`
 - **Job Tracker**: Uses the `job_id_tracker` table to maintain the current job ID
 

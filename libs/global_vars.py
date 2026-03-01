@@ -10,6 +10,7 @@ class VARS:
     from .vars.funny_responses import list_of_funny_not_allowed
     from .vars.responses import bot_keywords as bot_responses
     from .vars.responses import haralampi_keywords as haralampi_responses
+    from .vars.schedulers import schedulers
 
     files_to_clean = []
     response_num = 0

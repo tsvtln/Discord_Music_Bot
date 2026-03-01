@@ -18,6 +18,21 @@ import discord
 import requests
 
 
+class ConfirmButtonView(discord.ui.View):
+    """
+    Confirm button for the discord bot, used when sending patch notifications, so I can track if the message was seen
+    """
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.confirmed = False
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.secondary, custom_id="confirm_button")
+    async def confirm_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        button.style = discord.ButtonStyle.success  # green
+        button.disabled = True
+        await interaction.response.edit_message(view=self)
+
+
 class EventHandlers:
     def __init__(self, bot):
         self.bot = bot
@@ -113,7 +128,7 @@ class EventHandlers:
                                     job_output_build.append(job_output[index_start])
                                     index_start += 1
                     message = '\n'.join(job_output_build)
-                    await channel.send(message)
+                    await channel.send(message, view=ConfirmButtonView())
 
                     with db_connector.cursor() as cursor:
                         cursor.execute(next_job)
@@ -121,7 +136,7 @@ class EventHandlers:
 
             db_connector.close()
 
-        scheduler.add_job(check_and_post_ansible_job, CronTrigger(minute=0))
+        scheduler.add_job(check_and_post_ansible_job, CronTrigger(hour=13, minute=52))
         scheduler.start()
 
     def register_events(self):

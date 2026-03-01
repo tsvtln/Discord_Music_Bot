@@ -1,10 +1,23 @@
 # CHANGELOG
 
+## [2.2.1] - 2026-03-01
+### Added
+- **Confirm Button for Ansible Job Notifications**: Added a single 'Confirmed' button to each Ansible job status 
+notification. When clicked, the button turns green and disables for everyone, providing a clear visual confirmation 
+in the channel.
+
+### Changed
+- **Centralized Scheduler Times**: All scheduler times (e.g., for Ansible job status and daily facts) 
+are now centralized in `libs/global_vars.py` for easier configuration and maintenance.
+
+
 ## [2.2.0] - 2026-02-21
 ### Added
-- **Ansible Job Status Scheduler**: The bot now automatically checks and posts Ansible job execution status from a Semaphore server at scheduled times.
+- **Ansible Job Status Scheduler**: The bot now automatically checks and posts Ansible job execution 
+status from a Semaphore server at scheduled times.
     - Fetches job output and status from Semaphore REST API using Bearer token authentication stored in the database.
-    - Parses and extracts relevant job information including template name, execution status, and package upgrade summaries.
+    - Parses and extracts relevant job information including template name, execution status, 
+and package upgrade summaries.
     - Posts formatted job results to a configured Discord channel daily at 18:31.
     - Automatically increments the job ID tracker in the database after each successful post.
     - Integrated with MySQL `job_id_tracker` table and `config` table for API key storage.
@@ -23,34 +36,44 @@
 
 ## [2.1.1] - 2025-12-23
 ### Fixed 
-- Resolved an issue where the Haralampi AI mode was not properly utilizing conversation memory and user-specific behavior, leading to generic responses. Now, in AI mode, Haralampi provides more personalized and context-aware replies based on prior interactions and stored user data.
-- Fixed the bot mentioning the username only of the first user who initiated a chat session since it's first bootup. Now, Haralampi correctly identifies and mentions the username of the user currently interacting with it in AI mode.
-- Corrected the database query logic to ensure that user-specific data is accurately retrieved and stored in the `custom_user_data` table, preventing any potential data mix-ups between different users.
+- Resolved an issue where the Haralampi AI mode was not properly utilizing conversation memory and user-specific 
+behavior, leading to generic responses. Now, in AI mode, Haralampi provides more personalized and context-aware 
+replies based on prior interactions and stored user data.
+- Fixed the bot mentioning the username only of the first user who initiated a chat session since it's first bootup. 
+Now, Haralampi correctly identifies and mentions the username of the user currently interacting with it in AI mode.
+- Corrected the database query logic to ensure that user-specific data is accurately retrieved and stored in the 
+`custom_user_data` table, preventing any potential data mix-ups between different users.
 - Fixed the bot responses strafing into hiper long messages in AI mode. Now, responses are concise and relevant.
 
 ## [2.1.0] - 2025-12-21
 ### Added
-- **Haralampi AI/DB Toggle**: Haralampi keyword responses can now be switched between AI-powered (Claude 3 Haiku) and database-powered modes at runtime.
-- **$ChatMode Command**: Added `$ChatMode` command to toggle Haralampi between AI and database response modes. The bot replies with the current mode status.
-- **Custom User Data Table**: Added support for a new `custom_user_data` table for storing arbitrary user-specific data. Schema:
+- **Haralampi AI/DB Toggle**: Haralampi keyword responses can now be switched between AI-powered 
+(Claude 3 Haiku) and database-powered modes at runtime.
+- **$ChatMode Command**: Added `$ChatMode` command to toggle Haralampi between AI and database response modes. 
+The bot replies with the current mode status.
+- **Custom User Data Table**: Added support for a new `custom_user_data` table for storing 
+arbitrary user-specific data. Schema:
   ```sql
   CREATE TABLE custom_user_data (
       user_key VARCHAR(64) PRIMARY KEY,
       user_value TEXT NOT NULL
   );
   ```
-- **Memory and Personalization**: In AI mode, Haralampi uses conversation memory and user-specific behavior for responses.
+- **Memory and Personalization**: In AI mode, Haralampi uses conversation memory and user-specific 
+behavior for responses.
 
 ### Changed
 - Updated README with documentation for $ChatMode, Haralampi chat modes, and custom user data.
 - Keyword worker and global_vars updated to support chat mode toggling and custom user data loading.
 
 ### Fixed
-- $ChatMode and $key_words commands now bypass the shell command handler and are processed by the keyword worker as intended.
+- $ChatMode and $key_words commands now bypass the shell command handler and are processed 
+by the keyword worker as intended.
 
 ## [2.0.3] - 2025-12-13
 ### Added
-- **Random Daily Fact Feature**: The bot now posts a random real-world fact every day at a scheduled time to one or more channels.
+- **Random Daily Fact Feature**: The bot now posts a random real-world fact every day at a 
+scheduled time to one or more channels.
     - Facts are fetched from the Useless Facts API, with local fallback facts if the API is unavailable.
     - All facts for the day are tracked in `cache/fact_data.txt` to avoid repeats.
     - The feature is implemented using APScheduler and is fully automated—no user command required.
@@ -68,7 +91,8 @@
 
 ## [2.0.0] - 2025-08-07
 ### MAJOR OVERHAUL - Complete Architecture Restructure
-This version represents a complete rewrite and modularization of the Discord Music Bot, moving from a monolithic structure to a clean, modular architecture.
+This version represents a complete rewrite and modularization of the Discord Music Bot, 
+moving from a monolithic structure to a clean, modular architecture.
 
 ### Added
 - **Modular Architecture**: Complete restructure of codebase into separate, specialized modules
@@ -80,7 +104,8 @@ This version represents a complete rewrite and modularization of the Discord Mus
   - `on_message/lucky_draw.py` - Daily fortune draw functionality ($kysmetche)
   - `on_message/weather_cmd.py` - Weather command handling ($weather)
   - `on_message/keyword_worker.py` - Keyword-based GIF and string responses
-- **Global Variables System**: Centralized variable management through `libs/global_vars.py` with `VARS` class inheritance
+- **Global Variables System**: Centralized variable management through `libs/global_vars.py` 
+with `VARS` class inheritance
 - **Bot Runner**: New `BotRunner` class in `bin/main.py` for bot lifecycle management
 - **Presence Changer**: Dedicated `Presence` class for dynamic bot status updates
 - **Weather Integration**: Full weather functionality with OpenWeatherMap API integration
@@ -131,11 +156,13 @@ This version represents a complete rewrite and modularization of the Discord Mus
 
 ## [1.1.6]
 ### Added
-- $weather <city> command: The bot can now fetch and display the current weather for a specified city using the OpenWeatherMap API.
+- $weather <city> command: The bot can now fetch and display the current weather for a 
+specified city using the OpenWeatherMap API.
 - weather_app.py: Added main weather logic, including API integration and error handling.
 
 ### Changed
-- Weather command output now includes user-friendly error messages for API issues (e.g., invalid key, quota exceeded, city not found).
+- Weather command output now includes user-friendly error messages for API issues 
+(e.g., invalid key, quota exceeded, city not found).
 - Weather command and API key usage now rely on python-decouple for secure configuration.
 - Updated command list in $commands to include the new $weather command.
 
@@ -145,28 +172,36 @@ This version represents a complete rewrite and modularization of the Discord Mus
 
 ## [1.1.5]
 ### Added
-- GIF resizing and caching: All GIFs triggered by keywords are now resized to a smaller size (120x120) before being sent to Discord, reducing chat spam and improving usability.
-- GIF cache: Resized GIFs are stored in a `gif_cache` folder and reused for future requests, improving performance and reducing bandwidth.
-- Improved GIF color handling: Resizing uses Pillow's adaptive palette and dithering for best color preservation within GIF limitations.
+- GIF resizing and caching: All GIFs triggered by keywords are now resized to a smaller size (120x120) 
+before being sent to Discord, reducing chat spam and improving usability.
+- GIF cache: Resized GIFs are stored in a `gif_cache` folder and reused for future requests, improving 
+performance and reducing bandwidth.
+- Improved GIF color handling: Resizing uses Pillow's adaptive palette and dithering for best color 
+preservation within GIF limitations.
 - New keyword group: Added `d1` and `d1_keywords` for new GIF triggers.
 
 ### Changed
 - Updated keyword mapping logic to include the new `d1` group and keywords.
-- Updated GIF resizing logic to use Pillow's modern enums for resampling, palette, and dithering (for compatibility and fewer warnings).
+- Updated GIF resizing logic to use Pillow's modern enums for resampling, palette, and dithering 
+(for compatibility and fewer warnings).
 
 ### Fixed
-- Fixed warnings related to deprecated or missing Pillow constants (LANCZOS, ADAPTIVE, FLOYDSTEINBERG) by using the correct enums.
+- Fixed warnings related to deprecated or missing Pillow constants (LANCZOS, ADAPTIVE, FLOYDSTEINBERG) 
+by using the correct enums.
 - Fixed a bug where cached GIFs could be corrupted or not resized properly.
 - Improved fallback logic: If GIF resizing fails, the bot now falls back to sending the original GIF URL.
 
 ## [1.1.4]
 ### Added
-- Dynamic keyword listing for $key_words command: all keywords are now automatically collected from all keyword lists and mappings, no manual update required.
-- Wednesday keyword logic: if a message contains a Wednesday-related keyword, the bot checks the current day and sends a GIF from its_wednesday or not_wednesday accordingly.
+- Dynamic keyword listing for $key_words command: all keywords are now automatically collected from all 
+keyword lists and mappings, no manual update required.
+- Wednesday keyword logic: if a message contains a Wednesday-related keyword, the bot checks the current 
+day and sends a GIF from its_wednesday or not_wednesday accordingly.
 - Added new keywords to usl_keywords and wednesday_keywords for improved detection.
 
 ### Changed
-- Refactored keyword mapping logic for GIFs and string responses to use grouped lists and mappings, improving maintainability and scalability.
+- Refactored keyword mapping logic for GIFs and string responses to use grouped lists and mappings, 
+improving maintainability and scalability.
 - Updated $cmds command to show all allowed OS commands.
 
 ### Fixed
@@ -175,7 +210,8 @@ This version represents a complete rewrite and modularization of the Discord Mus
 
 ## [1.1.1]
 ### Added
-- Allowed shell command mapping for $-prefixed commands (e.g. $date) with custom command execution, using a whitelist from bot_map.py.
+- Allowed shell command mapping for $-prefixed commands (e.g. $date) with custom command execution, 
+using a whitelist from bot_map.py.
 - Example: $date runs 'date'.
 - Support for sudo commands if configured in allowed_commands and permitted in sudoers (can be a high security issue).
 

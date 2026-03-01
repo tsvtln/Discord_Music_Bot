@@ -60,7 +60,7 @@ class EventHandlers:
                 channel = self.client.get_channel(c)
                 if channel:
                     await channel.send(f"🧠 Daily Fact: {fact}")
-        scheduler.add_job(post_daily_fact, CronTrigger(hour=16, minute=20))
+        scheduler.add_job(post_daily_fact, CronTrigger(**VARS.schedulers.get('daily_facts')))
         scheduler.start()
 
     def send_ansible_job_status(self):
@@ -136,7 +136,7 @@ class EventHandlers:
 
             db_connector.close()
 
-        scheduler.add_job(check_and_post_ansible_job, CronTrigger(hour=13, minute=52))
+        scheduler.add_job(check_and_post_ansible_job, CronTrigger(**VARS.schedulers.get('ansible_jobs_status')))
         scheduler.start()
 
     def register_events(self):

@@ -2,7 +2,10 @@
 Weather command handler for the Discord Music Bot
 """
 import asyncio
+
+from bin.helpers import channel_checker
 from bin.weather_app import WeatherApp
+import bin.helpers
 
 
 class WeatherCommandHandler:
@@ -12,7 +15,7 @@ class WeatherCommandHandler:
     async def handle_weather_command(self, msg, days):
         """Handle weather command requests"""
         global weather_info
-        if msg.content.startswith('$weather'):
+        if msg.content.startswith('$weather') and channel_checker(msg):
             parts = msg.content.split(maxsplit=1)
             if len(parts) < 2 or not parts[1].strip():
                 return

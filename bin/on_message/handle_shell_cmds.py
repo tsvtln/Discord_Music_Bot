@@ -4,6 +4,8 @@ Handles system monitoring and administrative commands sent by users
 """
 
 import subprocess
+
+from bin.helpers import channel_checker
 from libs.global_vars import VARS
 
 
@@ -24,7 +26,7 @@ class ShellCommandHandler(VARS):
 
         # Ensure command_prefixes is a tuple of strings for startswith
         prefixes = tuple(self.command_prefixes) if isinstance(self.command_prefixes, (list, tuple)) else (self.command_prefixes,)
-        if msg.content.startswith('$') and not msg.content.startswith(prefixes):
+        if msg.content.startswith('$') and not msg.content.startswith(prefixes) and channel_checker(msg):
             cmd_key = msg.content[1:].strip()
             if cmd_key in self.allowed_commands:
                 command = self.allowed_commands[cmd_key]

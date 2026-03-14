@@ -174,3 +174,10 @@ class SuppressYouTubeMessages:
     def flush(self):
         pass
 
+
+def channel_checker(message) -> bool:
+
+    current_channel_id = message.channel.id
+    if current_channel_id not in VARS.banned_channels:
+        return True
+    return False

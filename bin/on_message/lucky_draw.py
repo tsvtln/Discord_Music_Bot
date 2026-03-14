@@ -5,6 +5,8 @@ Handles the daily fortune/luck drawing feature for users
 
 import random
 import subprocess
+
+from bin.helpers import channel_checker
 from libs.global_vars import VARS
 
 
@@ -23,10 +25,11 @@ class LuckyDrawHandler(VARS):
             # Insert record
             DBHelpers.execute(f"INSERT INTO {table} (username) VALUES (%s)", (user,))
             lucky_draw = random.choice(self.lucky_list)
-            await msg.channel.send(lucky_draw)
+            if channel_checker(msg):
+                await msg.channel.send(lucky_draw)
 
         # Lucky draw command
-        if msg.content.startswith('$kysmetche'):
+        if msg.content.startswith('$kysmetche') and channel_checker(msg):
             username = str(msg.author)
             # Local import to avoid circular deps
             from bin.db_helpers import DBHelpers

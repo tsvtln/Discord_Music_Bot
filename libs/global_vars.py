@@ -18,6 +18,15 @@ class VARS:
     last_message_date = 0
     chat_mode = True  # True = AI bot mode, False = database response mode
     debug_mode = False
+    banned_channels = [
+        1464610323901186139,
+        1460209888558055476,
+        1052574036292538429,
+        981166146059382838,
+        1010678381597171752,
+        1001533260469387345,
+        1048740148965294161,
+    ]
 
     @staticmethod
     def users_for_chat_mode() -> list[str]:

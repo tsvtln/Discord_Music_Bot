@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [2.2.2] - 2026-03-14
+### Enhancement
+- **Banned Channels**: Added list of banned channels in which the bot will not respond to any commands or messages. 
+  This is useful for preventing spam or unwanted interactions in specific channels. 
+  The list of banned channels can be configured in `libs/global_vars.py` under the `BANNED_CHANNELS` variable.
+
 ## [2.2.1] - 2026-03-01
 ### Added
 - **Confirm Button for Ansible Job Notifications**: Added a single 'Confirmed' button to each Ansible job status 

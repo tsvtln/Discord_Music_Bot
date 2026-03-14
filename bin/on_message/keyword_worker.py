@@ -10,7 +10,7 @@ from PIL import Image, ImageSequence
 import hashlib
 import discord
 from libs.global_vars import VARS
-from bin.helpers import Helpers
+from bin.helpers import Helpers, channel_checker
 from bin.artifical_bot import ArtificialBot
 
 
@@ -24,6 +24,8 @@ class KeywordWorker(VARS):
         }
 
     async def handle_keyword_responses(self, msg):
+        if not channel_checker(msg):
+            return False
         """Handle all keyword-based responses (GIFs and strings)"""
         # Do not process the bot's own messages to avoid reacting to lucky draw outputs
         if msg.author == self.client.user:
@@ -144,6 +146,8 @@ class KeywordWorker(VARS):
         return False
 
     async def _process_and_send_gif(self, msg, gif_url, word):
+        if not channel_checker(msg):
+            return False
         """Process, resize and cache GIF in DB, then send it"""
         # Build a deterministic cache filename based on keyword and URL hash
         url_hash = hashlib.md5(gif_url.encode('utf-8')).hexdigest()

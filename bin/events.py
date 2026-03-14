@@ -2,6 +2,7 @@
 Event handlers for the Discord Music Bot
 """
 import bin.db_helpers
+from .helpers import channel_checker
 from .player import Player
 from .presence_changer import Presence
 from .on_message.play_commands import PlayCommands
@@ -175,45 +176,46 @@ class EventHandlers:
         # Handle shell commands through the ShellCommandHandler module
         await self.shell_handler.handle_shell_command(msg)
 
-        # Handle music commands through the PlayCommands module
-        if msg.content.startswith(('$play', '$pause', '$resume', '$stop', '$queue')):
-            await self.play_commands.handle_music_commands(msg)
-            return
+        if channel_checker(msg):
+            # Handle music commands through the PlayCommands module
+            if msg.content.startswith(('$play', '$pause', '$resume', '$stop', '$queue')):
+                await self.play_commands.handle_music_commands(msg)
+                return
 
-        # Handle lucky draw commands through the LuckyDrawHandler module
-        if (msg.content.startswith('$kysmetche') or
-                (
-                        msg.author == self.client.user and
-                        msg.content.strip().startswith('Ще срещнеш човек, който... АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ.'))):
-            await self.lucky_draw_handler.handle_lucky_draw(msg)
-            return
+            # Handle lucky draw commands through the LuckyDrawHandler module
+            if (msg.content.startswith('$kysmetche') or
+                    (
+                            msg.author == self.client.user and
+                            msg.content.strip().startswith('Ще срещнеш човек, който... АЗ ВИЖДАМ НУЛИТЕ И ЕДИНИЦИТЕ.'))):
+                await self.lucky_draw_handler.handle_lucky_draw(msg)
+                return
 
-        # Handle weather commands through the WeatherCommandHandler module
-        if msg.content.startswith('$weather15'):
-            await self.weather_handler.handle_weather_command(msg, 15)
-            return
+            # Handle weather commands through the WeatherCommandHandler module
+            if msg.content.startswith('$weather15'):
+                await self.weather_handler.handle_weather_command(msg, 15)
+                return
 
-        if msg.content.startswith('$weather5'):
-            await self.weather_handler.handle_weather_command(msg, 5)
-            return
+            if msg.content.startswith('$weather5'):
+                await self.weather_handler.handle_weather_command(msg, 5)
+                return
 
-        if msg.content.startswith('$weather'):
-            await self.weather_handler.handle_weather_command(msg, 1)
-            return
+            if msg.content.startswith('$weather'):
+                await self.weather_handler.handle_weather_command(msg, 1)
+                return
 
-        # Handle keyword-related commands
-        if await self.keyword_worker.handle_keyword_commands(msg):
-            return
+            # Handle keyword-related commands
+            if await self.keyword_worker.handle_keyword_commands(msg):
+                return
 
-        # Handle keyword responses (GIFs and strings)
-        if await self.keyword_worker.handle_keyword_responses(msg):
-            return
+            # Handle keyword responses (GIFs and strings)
+            if await self.keyword_worker.handle_keyword_responses(msg):
+                return
 
-        # Other Commands
-        if msg.content.startswith("$cmds"):
-            await msg.channel.send(f"List of available commands:\n{'\n'.join(VARS.allowed_commands_list)}")
+            # Other Commands
+            if msg.content.startswith("$cmds"):
+                await msg.channel.send(f"List of available commands:\n{'\n'.join(VARS.allowed_commands_list)}")
 
-        # Output the list of commands
-        if msg.content.startswith("$commands"):
-            tp = '\n'.join(VARS.list_of_commands)
-            await msg.channel.send(f"Куманди:\n{tp}")
+            # Output the list of commands
+            if msg.content.startswith("$commands"):
+                tp = '\n'.join(VARS.list_of_commands)
+                await msg.channel.send(f"Куманди:\n{tp}")

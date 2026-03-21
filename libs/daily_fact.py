@@ -11,9 +11,9 @@ def _get_fallback_facts() -> List[str]:
     return [row[0] for row in rows]
 
 
-def _get_today_existing_facts() -> Set[str]:
+def _get_existing_facts() -> Set[str]:
     from bin.db_helpers import DBHelpers
-    rows = DBHelpers.fetch_all("SELECT fact_text FROM fact_data WHERE DATE(added_at) = CURDATE()")
+    rows = DBHelpers.fetch_all("SELECT fact_text FROM fact_data")
     return {row[0] for row in rows}
 
 
@@ -34,7 +34,7 @@ def fetch_fact_from_api():
 
 
 def get_today_fact() -> str:
-    existing_facts = _get_today_existing_facts()
+    existing_facts = _get_existing_facts()
     fallbacks = _get_fallback_facts() or [
         "A group of flamingos is called a flamboyance.",
         "Bananas are berries, but strawberries are not.",

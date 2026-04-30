@@ -129,8 +129,8 @@ class EventHandlers:
                                     job_output_build.append(job_output[index_start])
                                     index_start += 1
                     message = '\n'.join(job_output_build)
-                    if len(message) >= 3999:
-                        message = message[:3999]
+                    if len(message) >= 2000:
+                        message = message[:1999]
                     await channel.send(message, view=ConfirmButtonView())
 
                     with db_connector.cursor() as cursor:
